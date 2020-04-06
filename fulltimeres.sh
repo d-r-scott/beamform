@@ -13,33 +13,55 @@
 # ---------------------------------------------------------------------------------
 
 
-## Specify one antenna number, or dont pass argument if you want to add all antennas
+## Specify one antenna number, or a - if you want all antennas
+# TODO: Implement the above
 an=$1
+
+FRB=$2		# FRB to do
+a_or_m=$3	# AIPS or MIRIAD
+pol=$4		# polarisation (x or y)
 
 args=()
 ## set array size and offset
 i=1
 n=16384 # $n * 54 * 336 is the total length of the output array
 
-
 # FRB details (for other FRBs, refer to the README file)
 
-echo "FRB181112"
-offset=2106003
-DM=589.25
-f0=1297.5
+#echo "FRB181112"
+#offset=2106003
+#DM=589.25
+#f0=1297.5
 ## Calibration solution directories
-basedr=/fred/oz002/users/hcho/craft/
-calcfile=${basedr}Calibration/aipscal/frb181112/c1_f0/craftfrb.im # geometric delays
-fcm=${basedr}Calibration/aipscal/frb181112/fcm.txt # clock delays
-hwfile=${basedr}Calibration/mircal/frb181112/hwdelays_0407_SB7031_20181112222901_round-8.txt # hardware delays
-mir=${basedr}Calibration/mircal/frb181112/20181112222901_call_beam01_i4096_f9.uvlin # MIRIAD gain, bandpass
-aips=${basedr}Calibration/aipscal/frb181112/bandpass.bp.txt # AIPS gain, bandpass
+#basedr=/fred/oz002/users/hcho/craft/
+#calcfile=${basedr}Calibration/aipscal/frb181112/c1_f0/craftfrb.im # geometric delays
+#fcm=${basedr}Calibration/aipscal/frb181112/fcm.txt # clock delays
+#hwfile=${basedr}Calibration/mircal/frb181112/hwdelays_0407_SB7031_20181112222901_round-8.txt # hardware delays
+#mir=${basedr}Calibration/mircal/frb181112/20181112222901_call_beam01_i4096_f9.uvlin # MIRIAD gain, bandpass
+#aips=${basedr}Calibration/aipscal/frb181112/bandpass.bp.txt # AIPS gain, bandpass
 ## VCRAFT file directory - change
-f_vcraft=${basedr}python/voltages/FRB181112/ak**/beam01/*.vcraft
+#f_vcraft=${basedr}python/voltages/FRB181112/ak**/beam01/*.vcraft
 ## output file directories
-f_outfile="./test_output/f_y_an${an}.npy" # part 1 output (frequency domain)
-t_outfile="./test_output/t_y_an${an}.npy" # part 2 output (time doamin)
+#f_outfile="./test_output/f_y_an${an}.npy" # part 1 output (frequency domain)
+#t_outfile="./test_output/t_y_an${an}.npy" # part 2 output (time doamin)
+
+# Above is made obsolete by FRBdata.sh
+source FRBdata.sh $FRB $a_or_m $pol
+
+echo $FRB
+echo $offset
+echo $DM
+echo $f0
+echo $calcfile
+echo $fcm
+echo $hwfile
+echo $aips
+echo $mir
+echo $f_vcraft
+echo $f_outfile
+echo $t_outfile
+
+exit
 
 
 args+=("-i $i")
