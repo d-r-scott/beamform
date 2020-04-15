@@ -21,8 +21,15 @@ if (( $# != 4 )); then
 	exit
 fi
 
+# using sstar/gstar not recommended. It will take a long time to run.
+
+if [[ $HOSTNAME == *"sstar"* ]] || [[ $HOSTNAME == *"gstar"* ]]; then
+	echo "welcome to $HOSTNAME"
+	module load numpy/1.16.3-python-2.7.14
+fi
+
+
 ## Specify one antenna number, or a - if you want all antennas
-# TODO: Implement the above
 an=$1
 FRB=$2		# FRB to do
 a_or_m=$3	# AIPS or MIRIAD
@@ -33,20 +40,20 @@ args=()
 i=1
 n=16384 # $n * 54 * 336 is the total length of the output array
 
-source FRBdata.sh $FRB $a_or_m $pol
-
-echo $FRB
-echo $offset
-echo $DM
-echo $f0
-echo $calcfile
-echo $fcm
-echo $hwfile
-echo $aips
-echo $mir
-echo $f_vcraft
-echo $f_outfile
-echo $t_outfile
+source FRBdata.sh $FRB $a_or_m $pol $an
+echo ""
+echo "FRB$FRB"
+echo "offset=		$offset"
+echo "DM=		$DM"
+echo "f0=		$f0"
+echo "calcfile=	$calcfile"
+echo "fcm=		$fcm"
+echo "hwfile=	$hwfile"
+echo "aips=		$aips"
+echo "mir=	$mir"
+echo "f_vcraft=	$f_vcraft"
+echo "f_outfile=	$f_outfile"
+echo "t_outfile=	$t_outfile"
 
 exit
 
@@ -72,7 +79,7 @@ fi
 args+=("-o $f_outfile")
 
 # PART 1
-python craftcor.py ${args[@]} --tab $f_vcraft
+python craftcor_tab.py ${args[@]} --tab $f_vcraft
 
 
 # PART 2
