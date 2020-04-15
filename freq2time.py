@@ -6,20 +6,8 @@ reconstructs FFFF via de-rippling, coherent de-dispersing, and IFFT-ing.
 import numpy as np
 from scipy.interpolate import interp1d
 import os
-from scipy import io
 
-def generate_deripple(nfft,res):
-    N = 1536
-    OS_De = 27.
-    OS_Nu = 32.
-    dr = './ADE_R6_OSFIR.mat'
-    h = io.loadmat(dr)['c'][0]
-    passbandLength = int(((nfft / 2) * OS_De) / OS_Nu)
-    multiple = int(float(N)/res)
-    deripple=abs(np.fft.fft(h,multiple*passbandLength*2))
-    return deripple
-
-def deripple(FFFF, fftLength = 1048576, quiet=False):
+def deripple(FFFF, fftLength = 1048576, quiet=False, bw=336):
     if not quiet:
         print('derippling....')
     FFFF= FFFF[0,:,0]
@@ -31,12 +19,16 @@ def deripple(FFFF, fftLength = 1048576, quiet=False):
     passbandLength = int(((fftLength / 2) * OS_De) / OS_Nu)
 
     # de-ripple coefficients
-    res = 6 # resolution of the deripple coefficients
-    temp = generate_deripple(fftLength,res)
-    interp = interp1d(res*np.arange(len(temp)),temp)
+    dr_c_file = '../Calibration/deripple_res6_nfft'+str(fftLength)+'.npy'
+    if os.path.exists(dr_c_file)==False:
+        from generate_deripple import generate_deripple
+        print('No derippling coefficient found. Generating one...')
+        generate_deripple(fftLength,6)
+    temp=np.load(dr_c_file)
+    interp = interp1d(6*np.arange(len(temp)),temp)
     deripple = np.ones(passbandLength+1)/abs(interp(np.arange(passbandLength+1)))
 
-    for chan in range(336):
+    for chan in range(bw):
     #print(chan)
         for ii in range(passbandLength):
             FFFF[ii+chan*passbandLength*2] = FFFF[ii+chan*passbandLength*2]*deripple[passbandLength-ii]
@@ -69,7 +61,7 @@ def ifft_long(FFFF,quiet=False):
 
 def reconstruct(fn, fftLength, DM, f0 = 1320.5, bw=336, quiet=False):
     FFFF = np.load(fn)
-    FFFF = deripple(FFFF,fftLength,quiet)
+    FFFF = deripple(FFFF,fftLength,quiet,bw)
     FFFF = coh_dedisp(FFFF,DM,f0,bw,quiet)
     t_series = ifft_long(FFFF,quiet)
     return t_series
@@ -84,6 +76,7 @@ def _main():
     parser.add_argument('-d', '--DM', type=float, help='Dispersion measure', default=None)
     parser.add_argument('--f0', type=float, help='Central frequency', default=1320.5)
     parser.add_argument('-o', '--outfile', help="Output time series file directory")
+    parser.add_argument('--bw', type=int, help='Bandwidth', default=336)
     parser.add_argument('-l', '--fftlength', type=int, help="FFT length", default=1048576)
     parser.add_argument('--no_dr', help="Don't deripple", action='store_true', default=False)
     parser.add_argument('--no_dd', help="Don't dedisperse", action='store_true', default=False)
@@ -99,10 +92,10 @@ def _main():
         elif values.no_dr:
             print('No derippling')
             FFFF= FFFF[0,:,0]
-            FFFF = coh_dedisp(FFFF,values.DM,f_mid=values.f0, quiet=values.q)
+            FFFF = coh_dedisp(FFFF,values.DM,f_mid=values.f0,bw=values.bw,quiet=values.q)
         else:
             print('No dedispersing')
-            FFFF = deripple(FFFF,values.fftlength, quiet=values.q)
+            FFFF = deripple(FFFF,values.fftlength, quiet=values.q, bw=values.bw)
         if values.no_ifft:
             print('No ifft. Saving FFFF')
             t_series = FFFF
@@ -110,7 +103,7 @@ def _main():
             t_series = ifft_long(FFFF,quiet=values.q)
     else:
         print('Reconstructing...')
-        t_series = reconstruct(values.fn, values.fftlength, values.DM, f0=values.f0, quiet=values.q)
+        t_series = reconstruct(values.fn, values.fftlength, values.DM, f0=values.f0, quiet=values.q, bw=values.bw)
     
     if values.outfile is not None:
         print('output saved to: '+values.outfile)

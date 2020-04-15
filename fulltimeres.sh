@@ -23,11 +23,17 @@ fi
 
 # using sstar/gstar not recommended. It will take a long time to run.
 
-if [[ $HOSTNAME == *"sstar"* ]] || [[ $HOSTNAME == *"gstar"* ]]; then
-	echo "welcome to $HOSTNAME"
-	module load numpy/1.16.3-python-2.7.14
-fi
+#if [[ $HOSTNAME == *"sstar"* ]] || [[ $HOSTNAME == *"gstar"* ]]; then
+#	echo "welcome to $HOSTNAME"
+#	module load numpy/1.16.3-python-2.7.14
+#fi
 
+#module load numba/0.37.0-python-3.6.4
+module load python/2.7.14
+module load numpy/1.16.3-python-2.7.14
+module load matplotlib/2.2.2-python-2.7.14
+module load scipy/1.0.0-python-2.7.14
+module load astropy/2.0.3-python-2.7.14
 
 ## Specify one antenna number, or a - if you want all antennas
 an=$1
@@ -55,9 +61,6 @@ echo "f_vcraft=	$f_vcraft"
 echo "f_outfile=	$f_outfile"
 echo "t_outfile=	$t_outfile"
 
-exit
-
-
 args+=("-i $i")
 args+=("-n $n")
 args+=("--offset $offset")
@@ -79,9 +82,11 @@ fi
 args+=("-o $f_outfile")
 
 # PART 1
+echo "python craftcor_tab.py ${args[@]} --tab $f_vcraft"
 python craftcor_tab.py ${args[@]} --tab $f_vcraft
 
 
 # PART 2
 fftlen=$(( $n*64 ))
+echo "python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen -q"
 python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen -q

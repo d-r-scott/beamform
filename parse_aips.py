@@ -10,20 +10,28 @@ import matplotlib.pyplot as plt
 from scipy import io
 import os
 import sys
+from astropy.io import fits
 
 import glob
 
 
 
 class aipscor(object):
-    def __init__(self, fringfile, scfile, bpfile, vcraft_dr=None, imfile=None, input_dr=None):
+    def __init__(self, fringfile, scfile, bpfile, vcraft_dr=None, imfile=None, input_dr=None, specific_frb=None, fits=None):
         self.vcraft_dr = vcraft_dr
         self.imfile = imfile
         self.input_dr = input_dr
         self.fringfile = fringfile #delays.sn.txt'
+        self.polfringfile = None #self.fringfile.replace('delays.sn.txt','xpolfring_xpol.sn')
         self.scfile = scfile #selfcal.sn.txt'
         self.bpfile = bpfile #bandpass.bp.txt'
-        if vcraft_dr is not None and imfile is not None:
+        self.specific_frb = specific_frb
+        if fits is not None:
+            self.fits = fits
+            self.an_dict = self.map_anname_nosta()
+        if self.specific_frb == '190608':
+            print('FRB190608: ignore ak13, 19, 20, and 28')
+        if self.vcraft_dr is not None and self.imfile is not None:
             self.get_basic_info()
         
         
@@ -38,9 +46,12 @@ class aipscor(object):
         # self.freqs : dictionary of frequencies for each FPGAs
         # self.nfreq : number of total frequency channels
         
+        
         # number of antennas
         antennas = glob.glob(self.vcraft_dr+'/*/')
         self.nant = len(antennas)
+        if self.specific_frb == '190608':
+            self.nant -= 4
         
         # number of polarizations
         pols = glob.glob(antennas[0]+'/*')
@@ -61,6 +72,12 @@ class aipscor(object):
         
         # sort all vcraft files into different polarizations
         all_vfiles=glob.glob(self.vcraft_dr+'/*/*/*.vcraft')
+        if self.specific_frb == '190608': # exclude ak13, ak19, ak20, ak28
+            for ak in [13,19,20,28]:
+                all_vfiles = list(set(all_vfiles)- set(glob.glob(self.vcraft_dr+"/*ak{}*/*/*.vcraft".format(ak))))
+            for f in all_vfiles:
+                if 'ak13' in f or 'ak19' in f or 'ak20' in f or 'ak28' in f:
+                    print(f)
         #nfiles_per_pol = int(len(all_vfiles)/self.npol/self.nant)
         if self.npol == 1:
             self.vfiles = all_vfiles
@@ -82,12 +99,13 @@ class aipscor(object):
             print('ERROR, there should be either 1 or 2 polarizations')
 
         # get all antenna names for antenna index
-        self.an_name = [np.nan]*self.nant
-        for n in range(self.nant):
-            try:
-                self.an_name[n] = self.map_an_name(n)
-            except:
-                print('Error in maping names for iant',n)
+        #self.an_name = [np.nan]*self.nant
+        self.an_name = self.map_an_name()
+        #for n in range(self.nant):
+        #    try:
+        #        self.an_name[n] = self.map_an_name(n)
+        #    except:
+        #        print('Error in maping names for iant',n)
             
         # frequency information for vcraft files
         self.freqs = {}
@@ -104,14 +122,35 @@ class aipscor(object):
                             self.freqs[card_name]=freqs
                             self.nfreq += len(freqs)
         
-    def map_an_name(self, an_ind):
+    def map_an_name(self):#, an_ind):
         #%% MAP ANTENNA INDEX TO ANTENNA NAME
         # an_name : antenna name in "akNN" format
+        an_names = []
         with open(self.imfile, 'r') as fl:
             for line in fl:
-                if 'TELESCOPE '+str(an_ind)+' NAME: ' in line:
-                    an_name = line.split()[-1]
-        return an_name
+                if 'TELESCOPE' in line and 'NAME: ' in line:
+                    an_names += [line.split()[-1]]
+                #if 'TELESCOPE '+str(an_ind)+' NAME: ' in line:
+                    #an_name = line.split()[-1]
+        if self.specific_frb == '190608': # exclude ak13, ak19, ak20, ak28
+            an_names = list(set(an_names) - set(['ak13','ak19','ak20','ak28']))
+        
+        # check the number of antennas with the number of an_names
+        if self.nant != len(an_names):
+            print('WARNING: Failed to map antenna names')
+        return an_names
+    
+    def map_anname_nosta(self): # TODO! later make every get_delay/phase functions check the annames instead of iant and read in the correct calibration solutions from bandpass/fring/selfcal.
+        an_dict = {}
+        #hdul = fits.open(fits)
+        with fits.open(self.fits) as hdul:
+            data = hdul['AIPS AN'].data
+            anname = data['ANNAME']
+            nosta = data['NOSTA']
+            for i, an in enumerate(anname):
+                an_dict[an] = nosta[i]
+        #fits.close()
+        return an_dict
     
     def get_hwdelay(self, an_ind, pol, an_check=0, incards=False):
         #%% DELAY 0: FPGA HARDWARE DELAY
@@ -248,7 +287,35 @@ class aipscor(object):
             delay_ind = -2 # delay2 location within a line
 
         with open(self.fringfile, 'r') as fl:
+            fl.seek(0)
+            fl.seek(fl.read().find(start),0)
 
+            bool_record = False
+            while not bool_record:
+                data=fl.readline()
+                if self.specific_frb != '190608':
+                    if data.split()[0] == str(an_ind+1):
+                        bool_record = True
+                        delays_fring = float(data.split()[delay_ind]) # FRING fine time delay
+                else:
+                    temp = data.split()[0]
+                    if an_ind < 18 and temp == str(an_ind+1):
+                        bool_record = True
+                        delays_fring = float(data.split()[delay_ind]) # FRING fine time delay
+                    elif an_ind >=18 and temp == str(an_ind+3):
+                        bool_record = True
+                        delays_fring = float(data.split()[delay_ind]) # FRING fine time delay
+        return delays_fring
+    
+    def get_delay_polfring(self, an_ind, pol):
+        if pol == 'x':
+            start = "DELAY 1        RATE 1" # Delay 1
+            delay_ind = -3 # delay1 location within a line
+        else:
+            start = "DELAY 2        RATE 2" # Delay 2
+            delay_ind = -2 # delay2 location within a line
+
+        with open(self.polfringfile, 'r') as fl:
             fl.seek(0)
             fl.seek(fl.read().find(start),0)
 
@@ -257,26 +324,17 @@ class aipscor(object):
                 data=fl.readline()
                 if data.split()[0] == str(an_ind+1):
                     bool_record = True
-                    delays_fring = float(data.split()[delay_ind]) # FRING fine time delay
-
-        polfringfile = self.fringfile.replace('delays.sn.txt','xpolfring_xpol.sn')
-        if 0: #os.path.exists(polfringfile)==True: # DONT USE THIS NOW. It has been shown that AIPS polarization delay information is not enough. You also need phase offset.
-            print('Polarization fring file exists, adding this delay to the fring delay')
-            with open(polfringfile, 'r') as fl:
-                fl.seek(0)
-                fl.seek(fl.read().find(start),0)
-
-                bool_record = False
-                while not bool_record:
-                    data=fl.readline()
-                    if data.split()[0] == str(an_ind+1):
-                        bool_record = True
+                    if 1:
                         delays_polfring = float(data.split()[delay_ind]) # Polarization FRING fine time delay
-                        #delays_polfring *= -1
-            delays_fring += delays_polfring
-            
-        return delays_fring
+                        print("pol delay read from file ",delays_polfring)
+                    else:
+                        if pol == 'y':
+                            delays_polfring = -1.1999699e-09 #-1.122035e-9
+                            print("pol delay given to ",delays_polfring)
+                    #delays_polfring *= -1
+        return delays_polfring
     
+
     def get_phase_fring(self, an_ind, pol):
         #%% PHASE 1: FRING PHASE
         # phase_fring : phase measured by FRING
@@ -295,10 +353,21 @@ class aipscor(object):
             bool_record = False
             while not bool_record:
                 data=fl.readline()
-                if data.split()[0] == str(an_ind+1):
-                    bool_record = True
-                    phase_fring_real = float(data.split()[delay_ind]) # FRING real phase
-                    phase_fring_imag = float(data.split()[delay_ind+1]) # FRING imag phase
+                if self.specific_frb != '190608':
+                    if data.split()[0] == str(an_ind+1):
+                        bool_record = True
+                        phase_fring_real = float(data.split()[delay_ind]) # FRING real phase
+                        phase_fring_imag = float(data.split()[delay_ind+1]) # FRING imag phase
+                else:
+                    temp = data.split()[0]
+                    if an_ind < 18 and temp == str(an_ind+1):
+                        bool_record = True
+                        phase_fring_real = float(data.split()[delay_ind]) # FRING real phase
+                        phase_fring_imag = float(data.split()[delay_ind+1]) # FRING imag phase
+                    elif an_ind >=18 and temp == str(an_ind+3):
+                        bool_record = True
+                        phase_fring_real = float(data.split()[delay_ind]) # FRING real phase
+                        phase_fring_imag = float(data.split()[delay_ind+1]) # FRING imag phase
             phase_fring = phase_fring_real + 1j*phase_fring_imag
             if (abs(phase_fring)-1)>1e-3:
                 print("WARNING: amplitude of FRING phase is not 1 but "+str(abs(phase_fring)))
@@ -323,11 +392,21 @@ class aipscor(object):
             bool_record = False
             while not bool_record:
                 data=fl.readline()
-                if data.split()[0] == str(an_ind+1):
-                    bool_record = True
-                    phase_sc_real = float(data.split()[delay_ind]) # selfcal real phase
-                    phase_sc_imag = float(data.split()[delay_ind+1]) # selfcal imag phase
-
+                if self.specific_frb !='190608':
+                    if data.split()[0] == str(an_ind+1):
+                        bool_record = True
+                        phase_sc_real = float(data.split()[delay_ind]) # selfcal real phase
+                        phase_sc_imag = float(data.split()[delay_ind+1]) # selfcal imag phase
+                else:
+                    temp = data.split()[0]
+                    if an_ind < 18 and temp == str(an_ind+1):
+                        bool_record = True
+                        phase_sc_real = float(data.split()[delay_ind]) # selfcal real phase
+                        phase_sc_imag = float(data.split()[delay_ind+1]) # selfcal imag phase
+                    elif an_ind >=18 and temp == str(an_ind+3):
+                        bool_record = True
+                        phase_sc_real = float(data.split()[delay_ind]) # selfcal real phase
+                        phase_sc_imag = float(data.split()[delay_ind+1]) # selfcal imag phase
             phase_selfcal = phase_sc_real + 1j*phase_sc_imag
         return phase_selfcal
     
@@ -357,12 +436,27 @@ class aipscor(object):
             phase_bp_imag = np.full(nfreq,np.nan)
             while not bool_record:
                 data=fl.readline()
-                if data.split()[0] == str(an_ind+1):
-                    bool_record = True
-                    for chan in range(nfreq):
-                        phase_bp_real[chan] = float(data.split()[delay_ind]) # bandpass real phase
-                        phase_bp_imag[chan] = float(data.split()[delay_ind+1]) # bandpass imag phase
-                        data = fl.readline()
+                if self.specific_frb != '190608':  
+                    if data.split()[0] == str(an_ind+1):
+                        bool_record = True
+                        for chan in range(nfreq):
+                            phase_bp_real[chan] = float(data.split()[delay_ind]) # bandpass real phase
+                            phase_bp_imag[chan] = float(data.split()[delay_ind+1]) # bandpass imag phase
+                            data = fl.readline()
+                else:
+                    temp = data.split()[0]
+                    if an_ind < 18 and temp == str(an_ind+1):
+                        bool_record = True
+                        for chan in range(nfreq):
+                            phase_bp_real[chan] = float(data.split()[delay_ind]) # bandpass real phase
+                            phase_bp_imag[chan] = float(data.split()[delay_ind+1]) # bandpass imag phase
+                            data = fl.readline()
+                    elif an_ind >=18 and temp == str(an_ind+3):
+                        bool_record = True
+                        for chan in range(nfreq):
+                            phase_bp_real[chan] = float(data.split()[delay_ind]) # bandpass real phase
+                            phase_bp_imag[chan] = float(data.split()[delay_ind+1]) # bandpass imag phase
+                            data = fl.readline()
 
             phase_bandpass = phase_bp_real + 1j*phase_bp_imag
         return phase_bandpass
