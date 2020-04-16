@@ -26,7 +26,7 @@ def get_args():
 
 def load(fname):
 	print("Loading {}...".format(fname))
-	return np.load(fname)
+	return np.load(fname, mmap_mode='r')
 
 def crop(full_t_ser, t, b, a):
 	print("Cropping...")
@@ -35,7 +35,7 @@ def crop(full_t_ser, t, b, a):
 	return crop_t_ser
 	
 def save(crop_t_ser, dest_fname):
-	print("Saving {dest_fname}...".format(dest_fname))
+	print("Saving {}...".format(dest_fname))
 	np.save(dest_fname, crop_t_ser)
 	print("Saved!")
 
