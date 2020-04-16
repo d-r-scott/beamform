@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 Crops a given time series (assumed to be very large, ~GB) to the region around a specified time index.
 Intended for use on full time resolution voltage dumps of FRB detections, post-coherent dedispersion.
@@ -27,7 +25,7 @@ def get_args():
 	return parser.parse_args()
 
 def load(fname):
-	print(f"Loading {fname}...")
+	print("Loading {}...".format(fname))
 	return np.load(fname)
 
 def crop(full_t_ser, t, b, a):
@@ -37,7 +35,7 @@ def crop(full_t_ser, t, b, a):
 	return crop_t_ser
 	
 def save(crop_t_ser, dest_fname):
-	print(f"Saving {dest_fname}...")
+	print("Saving {dest_fname}...".format(dest_fname))
 	np.save(dest_fname, crop_t_ser)
 	print("Saved!")
 
