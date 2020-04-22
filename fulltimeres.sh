@@ -74,6 +74,8 @@ if [ "$a_or_m" == "AIPS" ]; then
 	args+=("--aips_c $aips") # optional, comment out if you want to use MIRIAD bandpass corrections
 elif [ "$a_or_m" == "MIRIAD" ]; then
 	args+=("--mirsolutions $mir") # optional, comment out if you want to use AIPS phase corrections
+elif [ "$a_or_m" == "NEITHER" ]; then
+	# do nothing
 else
 	echo "ERROR: Must provide AIPS or MIRIAD exactly!"
 	echo "Exiting..."
