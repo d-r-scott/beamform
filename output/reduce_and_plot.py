@@ -18,7 +18,7 @@ def _main():
 		print("Need at least one of x, y, i, q, u, or v!")
 	elif args.x or args.y:
 		X, Y = load_xy(args)
-		stokes = get_stokes(X, Y, args)
+		stokes = calculate_stokes(X, Y, args)
 		peak = np.argmax(stokes[0])	# get the peak as the highest point in Stokes I
 		reduced_stokes = reduce_all(stokes, args.n, args.c, peak=peak)
 		plot_stokes(reduced_stokes, smooth=args.s)
@@ -90,13 +90,14 @@ def load_stokes(args):
 	return ret
 
 
-def get_stokes(X, Y, args):
+def calculate_stokes(X, Y, args):
 	"""
 	Calculates, saves, and returns the Stokes parameters I, Q, U, and V from provided X and/or Y polarisations.
-	If only one of X or Y is not None, only I is calculated and saved. Q, U, and V are returned as None
+	If only one of X or Y is not None, U and V are calculated using only the provided polarisation
 	"""
 
-	# The Stokes arrays are generally large. This function saves a given array and loads it again in mmap_mode to save on memory
+	# The Stokes arrays are generally large.
+	# This function saves a given array and loads it again in mmap_mode to save on memory
 	def save_load(fname, A):
 		np.save(fname, A)
 		del A
@@ -124,14 +125,34 @@ def get_stokes(X, Y, args):
 		I = np.abs(X)**2
 		I = save_load(args.i, I)
 
-		Q = U = V = None
+		print("Calculating Q...")
+		Q = np.abs(X)**2
+		Q = save_load(args.q, Q)
+
+		print("Calculating U...")
+		U = 2*np.real(np.conj(X))
+		U = save_load(args.u, U)
+
+		print("Calculating V...")
+		V = 2*np.imag(np.conj(X))
+		V = save_load(args.v, V)
 
 	else:
 		print("Calculating I...")
 		I = np.abs(Y)**2
 		I = save_load(args.i, I)
 
-		Q = U = V = None
+		print("Calculating Q...")
+		Q = -np.abs(Y)**2
+		Q = save_load(args.q, Q)
+
+		print("Calculating U...")
+		U = 2*np.real(Y)
+		U = save_load(args.u, U)
+
+		print("Calculating V...")
+		V = 2*np.imag(Y)
+		V = save_load(args.v, V)
 
 	return I, Q, U, V
 
