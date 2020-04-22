@@ -75,7 +75,7 @@ if [ "$a_or_m" == "AIPS" ]; then
 elif [ "$a_or_m" == "MIRIAD" ]; then
 	args+=("--mirsolutions $mir") # optional, comment out if you want to use AIPS phase corrections
 elif [ "$a_or_m" == "NEITHER" ]; then
-	# do nothing
+	echo "Using neither AIPS or MIRIAD"
 else
 	echo "ERROR: Must provide AIPS or MIRIAD exactly!"
 	echo "Exiting..."
