@@ -81,16 +81,16 @@ else
 		offset=2018819
 		DM=338.8
 		f0=1271.5
-		calcfile="${basedr}Calibration/aipscal/frb${frb}/craftfrb.im" # geometric delays
-		fcm="${basedr}Calibration/aipscal/frb${frb}/fcm.txt" # clock delays
+		calcfile="${basedr}Calibration/aipscal/frb${FRB}/craftfrb.im" # geometric delays
+		fcm="${basedr}Calibration/aipscal/frb${FRB}/fcm.txt" # clock delays
 		hwfile= # No hardware delays
 		#mir= # MIR gain, bandpass
-		aips="${basedr}Calibration/aipscal/frb${frb}/noxpol/200225/bandpasses.bp.txt" # AIPS gain, bandpass
+		aips="${basedr}Calibration/aipscal/frb${FRB}/noxpol/200225/bandpasses.bp.txt" # AIPS gain, bandpass
 
 		if [ "$pol" == "x" ]; then
-			f_vcraft=$(find ${basedr2}python/voltages/FRB${frb}/ak**/beam36/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+			f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam36/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
 		elif [ "$pol" == "y" ]; then
-			f_vcraft=$(find ${basedr2}python/voltages/FRB${frb}/ak**/beam37/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+			f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam37/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
 		else
 			echo "ERROR: Must provide polarisation as x or y!"
 		fi
@@ -99,16 +99,16 @@ else
 		offset=2018819
 		DM=338.8
 		f0=1271.5
-		calcfile="${basedr}Calibration/aipscal/frb${frb}/craftfrb.im"
-		fcm="${basedr}Calibration/aipscal/frb${frb}/fcm.txt"
+		calcfile="${basedr}Calibration/aipscal/frb${FRB}/craftfrb.im"
+		fcm="${basedr}Calibration/aipscal/frb${FRB}/fcm.txt"
 		hwfile= # No hardware delays
 		#mir= # MIR gain, bandpass
-		aips="${basedr}Calibration/aipscal/frb${frb}/noxpol/200225/bandpasses.bp.txt" # AIPS gain, bandpass
+		aips="${basedr}Calibration/aipscal/frb${FRB}/noxpol/200225/bandpasses.bp.txt" # AIPS gain, bandpass
 
 		if [ "$pol" == "x" ]; then
-			f_vcraft=$(find ${basedr2}python/voltages/FRB${frb}/ak**/beam36/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+			f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam36/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
 		elif [ "$pol" == "y" ]; then
-			f_vcraft=$(find ${basedr2}python/voltages/FRB${frb}/ak**/beam37/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+			f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam37/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
 		else
 			echo "ERROR: Must provide polarisation as x or y!"
 		fi
@@ -117,16 +117,16 @@ else
 		offset=302100
 		DM=587.5
 		f0=1271.5
-		calcfile="${basedr}Calibration/aipscal/frb${frb}/craftfrb.im" # geometric delays
-		fcm="${basedr}Calibration/aipscal/frb${frb}/fcm.txt" # clock delays
+		calcfile="${basedr}Calibration/aipscal/frb${FRB}/craftfrb.im" # geometric delays
+		fcm="${basedr}Calibration/aipscal/frb${FRB}/fcm.txt" # clock delays
 		hwfile= # No hardware delays
 		#mir= # MIR gain, bandpass
-		aips="${basedr}Calibration/aipscal/frb${frb}/noxpol/bandpasses_noxpol.bp.txt" # AIPS gain, bandpass
+		aips="${basedr}Calibration/aipscal/frb${FRB}/noxpol/bandpasses_noxpol.bp.txt" # AIPS gain, bandpass
 
 		if [ "$pol" == "x" ]; then
-			f_vcraft="${basedr2}python/voltages/FRB${frb}/ak**/beam30/*.vcraft"
+			f_vcraft="${basedr2}python/voltages/FRB${FRB}/ak**/beam30/*.vcraft"
 		elif [ "$pol" == "y" ]; then
-			f_vcraft="${basedr2}python/voltages/FRB${frb}/ak**/beam31/*.vcraft"
+			f_vcraft="${basedr2}python/voltages/FRB${FRB}/ak**/beam31/*.vcraft"
 		else
 			echo "ERROR: Must provide polarisation as x or y!"
 		fi
@@ -135,17 +135,17 @@ else
 		offset=1887164
 		DM=322.6
 		f0=1271.5
-		calcfile="${basedr}Calibration/aipscal/frb${frb}/craftfrb.im" # geometric delays
-		fcm="${basedr}Calibration/aipscal/frb${frb}/fcm.txt" # clock delays
+		calcfile="${basedr}Calibration/aipscal/frb${FRB}/craftfrb.im" # geometric delays
+		fcm="${basedr}Calibration/aipscal/frb${FRB}/fcm.txt" # clock delays
 		hwfile= # No hardware delays
 		#mir= # MIR gain, bandpass
-		aips= #"${basedr}Calibration/aipscal/frb${frb}/noxpol/bandpasses_noxpol_FRB190611.2.bp.txt" # AIPS gain, bandpass
+		aips= #"${basedr}Calibration/aipscal/frb${FRB}/noxpol/bandpasses_noxpol_FRB190611.2.bp.txt" # AIPS gain, bandpass
 
 		if [ "$pol" == "x" ]; then
-			f_vcraft="${basedr2}python/voltages/FRB${frb}/ak**/beam56/*.vcraft"
+			f_vcraft="${basedr2}python/voltages/FRB${FRB}/ak**/beam56/*.vcraft"
 		elif [ "$pol" == "y" ]; then
 			echo "y pol corrupted"
-		    #f_vcraft="${basedr2}python/voltages/FRB${frb}/ak**/beam27/*.vcraft"
+		    #f_vcraft="${basedr2}python/voltages/FRB${FRB}/ak**/beam27/*.vcraft"
 		else
 			echo "ERROR: Must provide polarisation as x or y!"
 		fi
@@ -154,16 +154,16 @@ else
 		offset=1576224
 		DM=296.5
 		f0=1271.5
-		calcfile="${basedr}Calibration/aipscal/frb${frb}/craftfrb.im" # geometric delays
-		fcm="${basedr}Calibration/aipscal/frb${frb}/fcm.txt" # clock delays
+		calcfile="${basedr}Calibration/aipscal/frb${FRB}/craftfrb.im" # geometric delays
+		fcm="${basedr}Calibration/aipscal/frb${FRB}/fcm.txt" # clock delays
 		hwfile= # No hardware delays
 		#mir= # MIR gain, bandpass
-		aips="${basedr}Calibration/aipscal/frb${frb}/noxpol/bandpasses_noxpol.bp.txt" # AIPS gain, bandpass
+		aips="${basedr}Calibration/aipscal/frb${FRB}/noxpol/bandpasses_noxpol.bp.txt" # AIPS gain, bandpass
 
 		if [ "$pol" == "x" ]; then
-			f_vcraft="${basedr2}python/voltages/FRB${frb}/ak**/beam42/*.vcraft"
+			f_vcraft="${basedr2}python/voltages/FRB${FRB}/ak**/beam42/*.vcraft"
 		elif [ "$pol" == "y" ]; then
-			f_vcraft="${basedr2}python/voltages/FRB${frb}/ak**/beam43/*.vcraft"
+			f_vcraft="${basedr2}python/voltages/FRB${FRB}/ak**/beam43/*.vcraft"
 		else
 			echo "ERROR: Must provide polarisation as x or y!"
 		fi

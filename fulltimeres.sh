@@ -69,7 +69,9 @@ if [ "$an" != "-" ]; then
 fi
 args+=("--calcfile $calcfile")
 args+=("--parset $fcm")
-args+=("--hwfile $hwfile")
+if [ "$hwfile" != "" ]; then
+	args+=("--hwfile $hwfile")
+fi
 if [ "$a_or_m" == "AIPS" ]; then
 	args+=("--aips_c $aips") # optional, comment out if you want to use MIRIAD bandpass corrections
 elif [ "$a_or_m" == "MIRIAD" ]; then
