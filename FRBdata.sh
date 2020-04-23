@@ -133,7 +133,7 @@ else
 
 	elif [ "$FRB" == "190714" ]; then
 		offset=1887164
-		DM=322.6
+		DM=504.13		# Uncertain
 		f0=1271.5
 		calcfile="${basedr}Calibration/aipscal/frb${FRB}/craftfrb.im" # geometric delays
 		fcm="${basedr}Calibration/aipscal/frb${FRB}/fcm.txt" # clock delays
