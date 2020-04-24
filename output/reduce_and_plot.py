@@ -14,19 +14,19 @@ from scipy import signal
 def _main():
 	args = get_args()
 
-	if not ( args.x or args.y or args.i or args.q or args.u or args.v):
+	if not (args.x or args.y or args.i or args.q or args.u or args.v):
 		print("Need at least one of x, y, i, q, u, or v!")
 	elif args.x or args.y:
 		X, Y = load_xy(args)
 		stokes = calculate_stokes(X, Y, args)
-		peak = np.argmax(stokes[0])	# get the peak as the highest point in Stokes I
+		peak = np.argmax(stokes[0])		# get the peak as the highest point in Stokes I
 		reduced_stokes = reduce_all(stokes, args.n, args.c, peak=peak)
-		plot_stokes(reduced_stokes, smooth=args.s)
+		plot_stokes(reduced_stokes, smooth=args.s, title=args.t)
 	else:
 		stokes = load_stokes(args)
 		peak = np.argmax(stokes[0])
 		reduced_stokes = reduce_all(stokes, args.n, args.c, peak=peak)
-		plot_stokes(reduced_stokes, smooth=args.s)
+		plot_stokes(reduced_stokes, smooth=args.s, title=args.t)
 
 
 def get_args():
@@ -44,6 +44,7 @@ def get_args():
 	parser.add_argument('-n', type=int, help='Factor to reduce time resolution by [default=1000000]', default=1000000)
 	parser.add_argument('-s', type=int, help='Smooth to apply to the plotted series [default=None]', default=None)
 	parser.add_argument('-c', action='store_true', help='Crop plotted series to the locale of the peak', default=False)
+	parser.add_argument('-r', type=str, help='Title to put on the plot', default=None)
 
 	return parser.parse_args()
 
@@ -188,7 +189,7 @@ def reduce(A, n):
 	return np.array(A_red)
 
 
-def plot_stokes(stokes, smooth=None):
+def plot_stokes(stokes, smooth=None, title=None):
 	"""
 	Plots the given stokes parameters. If smooth is not none, they are smooth with a Gaussian.
 	"""
@@ -202,12 +203,13 @@ def plot_stokes(stokes, smooth=None):
 	if smooth:
 		for par in stokes:
 			smooth_par = smooth_f(par, smooth)
-			plt.plot(smooth_par - np.mean(par))		# Always zero-meaning plotted lines
+			plt.plot(smooth_par - np.mean(par), lw=1)		# Always zero-meaning plotted lines
 	else:
 		for par in stokes:
-			plt.plot(par - np.mean(par))
+			plt.plot(par - np.mean(par), lw=1)
 
 	plt.legend(['I', 'Q', 'U', 'V'])
+	plt.title(title)
 	plt.show()
 
 
