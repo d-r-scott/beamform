@@ -44,7 +44,7 @@ def get_args():
 	parser.add_argument('-n', type=int, help='Factor to reduce time resolution by [default=1000000]', default=1000000)
 	parser.add_argument('-s', type=int, help='Smooth to apply to the plotted series [default=None]', default=None)
 	parser.add_argument('-c', action='store_true', help='Crop plotted series to the locale of the peak', default=False)
-	parser.add_argument('-r', type=str, help='Title to put on the plot', default=None)
+	parser.add_argument('-t', type=str, help='Title to put on the plot', default=None)
 
 	return parser.parse_args()
 
