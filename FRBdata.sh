@@ -139,7 +139,7 @@ else
 		fcm="${basedr}Calibration/aipscal/frb${FRB}/fcm.txt" # clock delays
 		hwfile= # No hardware delays
 		#mir= # MIR gain, bandpass
-		aips= #"${basedr}Calibration/aipscal/frb${FRB}/noxpol/bandpasses_noxpol_FRB190611.2.bp.txt" # AIPS gain, bandpass
+		aips="/fred/oz002/users/dscott/Calibration/aipscal/frb190714/bandpasses_noxpol_FRB.bp.txt"
 
 		if [ "$pol" == "x" ]; then
 			f_vcraft="${basedr2}python/voltages/FRB${FRB}/ak**/beam56/*.vcraft"
