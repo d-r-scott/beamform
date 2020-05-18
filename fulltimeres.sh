@@ -44,7 +44,7 @@ pol=$4		# polarisation (x or y)
 args=()
 ## set array size and offset
 i=1
-n=16384 # $n * 54 * 336 is the total length of the output array
+n=40960 # $n * 54 * 336 is the total length of the output array
 
 source FRBdata.sh $FRB $a_or_m $pol $an
 echo ""
@@ -92,5 +92,5 @@ python craftcor_tab.py ${args[@]} --tab $f_vcraft
 
 # PART 2
 fftlen=$(( $n*64 ))
-echo "python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen -q"
-python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen -q
+echo "python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen"
+python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen

@@ -158,6 +158,8 @@ elif [ $frb = 191001 ]; then
 nant=30
 elif [ $frb = 191228 ]; then
 nant=21
+elif [ $frb = 200430 ]; then
+nant=26
 else
 nant=0
 echo "Please specify total # of antenna for this FRB${frb}"
@@ -167,8 +169,8 @@ for (( iant=0; iant<$nant; iant++  ))
 #for iant in {0..22} #23} #11} #
 do
 fn=${here}/log/recon${iant}${pol}_${frb}.log
-t=1:00:00
-mem=30g
+t=3:00:00
+mem=100g
 jobname=${iant}recon
 
 echo "sbatch --job-name=${jobname} --output=${fn} --error=${fn} --time=${t} --mem=${mem} $script $iant $frb $a_or_m $pol"

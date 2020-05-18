@@ -168,6 +168,25 @@ else
 			echo "ERROR: Must provide polarisation as x or y!"
 		fi
 
+
+	elif [ "$FRB" == "200430" ]; then
+		offset=32
+		DM=380.25
+		f0=864.5
+		calcfile="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/craftfrb_139162.im"
+		fcm="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/fcm.txt"
+		hwfile=
+		mir=
+		aips="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/bandpasses_noxpol_FRB200430.bp.txt"
+
+		if [ "$pol" == "x" ]; then
+			f_vcraft="/fred/oz002/askap/craft/frb200430/frb/rawdata/SB13593/20200430154900/ICS/C000/ak**/beam48/*.vcraft"
+		elif [ "$pol" == "y" ]; then
+			f_vcraft="/fred/oz002/askap/craft/frb200430/frb/rawdata/SB13593/20200430154900/ICS/C000/ak**/beam49/*.vcraft"
+		else
+			echo "ERROR: Must provide polarisation as x or y!"
+		fi
+
 	else
 		echo "ERROR: FRB not recognised!"
 	fi

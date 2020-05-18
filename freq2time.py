@@ -6,6 +6,7 @@ reconstructs FFFF via de-rippling, coherent de-dispersing, and IFFT-ing.
 import numpy as np
 from scipy.interpolate import interp1d
 import os
+import scipy.fftpack as fft
 
 def deripple(FFFF, fftLength = 1048576, quiet=False, bw=336):
     if not quiet:
@@ -24,6 +25,7 @@ def deripple(FFFF, fftLength = 1048576, quiet=False, bw=336):
         from generate_deripple import generate_deripple
         print('No derippling coefficient found. Generating one...')
         generate_deripple(fftLength,6)
+    print('loading {}'.format(dr_c_file))
     temp=np.load(dr_c_file)
     interp = interp1d(6*np.arange(len(temp)),temp)
     deripple = np.ones(passbandLength+1)/abs(interp(np.arange(passbandLength+1)))
@@ -56,7 +58,7 @@ def coh_dedisp(FFFF, DM, f_mid=1320.5, bw=336, quiet=False):
 def ifft_long(FFFF,quiet=False):
     if not quiet:
         print('ifft-ing....')
-    t_series= np.fft.ifft(np.fft.fftshift(FFFF))
+    t_series= fft.ifft(fft.fftshift(FFFF))
     return t_series
 
 def reconstruct(fn, fftLength, DM, f0 = 1320.5, bw=336, quiet=False):
