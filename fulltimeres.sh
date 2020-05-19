@@ -21,7 +21,7 @@ if (( $# != 4 )); then
 	exit
 fi
 
-modules_1="python/2.7.14 numpy/1.16.3-python-2.7.14 load scipy/1.0.0-python-2.7.14 load astropy/2.0.3-python-2.7.14"
+modules_1="python/2.7.14 numpy/1.16.3-python-2.7.14 scipy/1.0.0-python-2.7.14 astropy/2.0.3-python-2.7.14"
 module load $modules_1
 
 ## Specify one antenna number, or a - if you want all antennas
@@ -89,7 +89,7 @@ python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $f_dd_outfile -l $fftlen
 
 #   2.2: IFFT
 module unload $modules_1
-modules_2="python/3.7.4 numpy/1.18.3-python-3.7.4 scipy/1.3.1-python-3.7.4"
+modules_2="python/3.7.4 numpy/1.18.2-python-3.7.4 scipy/1.4.1-python-3.7.4"
 module load $modules_2
 
 echo "python ifft.py $f_dd_outfile $t_outfile"
