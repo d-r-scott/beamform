@@ -21,19 +21,8 @@ if (( $# != 4 )); then
 	exit
 fi
 
-# using sstar/gstar not recommended. It will take a long time to run.
-
-#if [[ $HOSTNAME == *"sstar"* ]] || [[ $HOSTNAME == *"gstar"* ]]; then
-#	echo "welcome to $HOSTNAME"
-#	module load numpy/1.16.3-python-2.7.14
-#fi
-
-#module load numba/0.37.0-python-3.6.4
-module load python/2.7.14
-module load numpy/1.16.3-python-2.7.14
-module load matplotlib/2.2.2-python-2.7.14
-module load scipy/1.0.0-python-2.7.14
-module load astropy/2.0.3-python-2.7.14
+modules_1="python/2.7.14 numpy/1.16.3-python-2.7.14 load scipy/1.0.0-python-2.7.14 load astropy/2.0.3-python-2.7.14"
+module load $modules_1
 
 ## Specify one antenna number, or a - if you want all antennas
 an=$1
@@ -42,6 +31,7 @@ a_or_m=$3	# AIPS or MIRIAD
 pol=$4		# polarisation (x or y)
 
 args=()
+
 ## set array size and offset
 i=1
 n=40960 # $n * 54 * 336 is the total length of the output array
@@ -59,6 +49,7 @@ echo "aips=		$aips"
 echo "mir=	$mir"
 echo "f_vcraft=	$f_vcraft"
 echo "f_outfile=	$f_outfile"
+echo "f_dd_outfile= $f_dd_outfile"
 echo "t_outfile=	$t_outfile"
 
 args+=("-i $i")
@@ -91,6 +82,15 @@ python craftcor_tab.py ${args[@]} --tab $f_vcraft
 
 
 # PART 2
+#   2.1: Deripple and dedisperse
 fftlen=$(( $n*64 ))
-echo "python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen"
-python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $t_outfile -l $fftlen
+echo "python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $f_dd_outfile -l $fftlen"
+python freq2time.py -f $f_outfile -d $DM --f0 $f0 -o $f_dd_outfile -l $fftlen
+
+#   2.2: IFFT
+module unload $modules_1
+modules_2="python/3.7.4 numpy/1.18.3-python-3.7.4 scipy/1.3.1-python-3.7.4"
+module load $modules_2
+
+echo "python ifft.py $f_dd_outfile $t_outfile"
+python ifft.py $f_dd_outfile $t_outfile

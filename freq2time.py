@@ -68,8 +68,7 @@ def reconstruct(fn, fftLength, DM, f0 = 1320.5, bw=336, quiet=False):
 	FFFF = np.load(fn)
 	FFFF = deripple(FFFF,fftLength,quiet,bw)
 	FFFF = coh_dedisp(FFFF,DM,f0,bw,quiet)
-	t_series = ifft_long(FFFF,quiet)
-	return t_series
+	return FFFF
 
 
 def _main():
@@ -108,11 +107,11 @@ def _main():
 			t_series = ifft_long(FFFF,quiet=values.q)
 	else:
 		print('Reconstructing...')
-		t_series = reconstruct(values.fn, values.fftlength, values.DM, f0=values.f0, quiet=values.q, bw=values.bw)
+		FFFF_dd = reconstruct(values.fn, values.fftlength, values.DM, f0=values.f0, quiet=values.q, bw=values.bw)
 	
 	if values.outfile is not None:
 		print('output saved to: '+values.outfile)
-		np.save(values.outfile,t_series)
+		np.save(values.outfile, FFFF_dd)
 	print('freq2time.py running time: '+str(time.time()-t0))
 		
 if __name__ == '__main__':

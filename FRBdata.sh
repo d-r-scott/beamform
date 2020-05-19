@@ -192,6 +192,7 @@ else
 	fi
 
 	f_outfile="./output/${FRB}_${pol}_${an}_f.npy"
+	f_dd_outfile="./output/${FRB}_${pol}_${an}_f_dd.npy"
 	t_outfile="./output/${FRB}_${pol}_${an}_t.npy"
 
 fi
