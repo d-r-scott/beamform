@@ -82,7 +82,7 @@ def load_stokes_dynspec(frb, dir=None):
 	:param dir: If the FRB directory is different from the FRB name, provide dir with the directory name
 	:return: A tuple (I, Q, U, V)
 	"""
-	if dir is not None:
+	if dir is None:
 		dir=frb
 
 	stk_str = ['i', 'q', 'u', 'v']
