@@ -57,9 +57,9 @@ def save_stokes_dynspec(x, y, frb):
 
 	# lambda functions for each of the Stokes parameters
 	stokes = {
-		"i" : lambda x, y: np.abs(x)**2 + np.abs(y)**2
-		"q" : lambda x, y: np.abs(x)**2 - np.abs(y)**2
-		"u" : lambda x, y: 2*np.real(np.conj(x) * y)
+		"i" : lambda x, y: np.abs(x)**2 + np.abs(y)**2,
+		"q" : lambda x, y: np.abs(x)**2 - np.abs(y)**2,
+		"u" : lambda x, y: 2*np.real(np.conj(x) * y),
 		"v" : lambda x, y: 2*np.imag(np.conj(x) * y)
 	}
 
