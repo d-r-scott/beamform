@@ -67,7 +67,7 @@ def save_stokes_dynspec(x, y, frb):
 
 	for stk in stk_str:
 		print(f'Calculating {stk}')
-		par = stokes[stk](x, y)
+		par = stokes[stk](x_ds, y_ds)
 
 		print(f'Saving {stk}_ds_{frb}.npy')
 		np.save(f'{stk}_ds_{frb}.npy', par)
