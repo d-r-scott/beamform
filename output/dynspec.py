@@ -73,16 +73,20 @@ def save_stokes_dynspec(x, y, frb):
 		np.save(f'{stk}_ds_{frb}.npy', par)
 		del par
 
-def load_stokes_dynspec(frb):
+def load_stokes_dynspec(frb, dir=None):
 	"""
 	Loads stokes parameters from provided FRB directory:
 		{frb}/[iquv]_ds_{frb}.npy
 
 	:param frb: String with name of FRB, for the filenames
+	:param dir: If the FRB directory is different from the FRB name, provide dir with the directory name
 	:return: A tuple (I, Q, U, V)
 	"""
+	if dir is not None:
+		dir=frb
+
 	stk_str = ['i', 'q', 'u', 'v']
-	ret = ( np.load('{}/{}_ds_{}.npy'.format(frb, stk, frb), mmap_mode='r' ) for stk in stk_str )
+	ret = ( np.load('{}/{}_ds_{}.npy'.format(dir, stk, frb), mmap_mode='r' ) for stk in stk_str )
 	return ret
 
 
