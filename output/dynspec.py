@@ -54,14 +54,23 @@ def save_stokes_dynspec(x, y, frb):
 		y_ds = generate_dynspec(y)
 
 	print("Calculating Stokes parameters")
-	i_ds, q_ds, u_ds, v_ds = IQUV(x_ds, y_ds)
+
+	# lambda functions for each of the Stokes parameters
+	stokes = {
+		"i" : lambda x, y: np.abs(x)**2 + np.abs(y)**2
+		"q" : lambda x, y: np.abs(x)**2 - np.abs(y)**2
+		"u" : lambda x, y: 2*np.real(np.conj(x) * y)
+		"v" : lambda x, y: 2*np.imag(np.conj(x) * y)
+	}
 
 	stk_str = ['i', 'q', 'u', 'v']
 
-	for j, par in enumerate((i_ds, q_ds, u_ds, v_ds)):
-		print("Saving {}_ds_{}.npy".format(stk_str[j], frb))
-		np.save('{}_ds_{}.npy'.format(stk_str[j], frb), par)
-		# Delete once we're done with the parameter so it doesn't waste memory
+	for stk in stk_str:
+		print(f'Calculating {stk}')
+		par = stokes[stk](x, y)
+
+		print(f'Saving {stk}_ds_{frb}.npy')
+		np.save(f'{stk}_ds_{frb}.npy', par)
 		del par
 
 def load_stokes_dynspec(frb):
