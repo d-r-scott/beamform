@@ -21,7 +21,7 @@ if (( $# != 4 )); then
 	exit
 fi
 
-modules_1="python/2.7.14 numpy/1.16.3-python-2.7.14 scipy/1.0.0-python-2.7.14 astropy/2.0.3-python-2.7.14"
+modules_1="python/2.7.14 numpy/1.16.3-python-2.7.14 scipy/1.0.0-python-2.7.14 astropy/2.0.3-python-2.7.14 matplotlib/2.2.2-python-2.7.14"
 module load $modules_1
 
 ## Specify one antenna number, or a - if you want all antennas
