@@ -4,6 +4,8 @@ A collection of functions for creating, manipulating, and plotting dynamic spect
 
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import progressbar
 
 def generate_dynspec(t_ser):
 	"""
@@ -15,8 +17,11 @@ def generate_dynspec(t_ser):
 	"""
 	n = 336
 	dynspec = np.zeros((int(t_ser.shape[0]/n), n), dtype=np.complex64)
-	for i in range(int(t_ser.shape[0]/n)):
-		dynspec[i, :] = np.fft.fft(t_ser[i*n:(i+1)*n])
+	with progressbar.ProgressBar(max_value=int(t_ser.shape[0]/n)) as bar:
+		for i in range(int(t_ser.shape[0]/n)):
+			dynspec[i, :] = np.fft.fft(t_ser[i*n:(i+1)*n])
+			bar.update(i)
+
 	return dynspec
 
 def IQUV(x, y):
@@ -100,8 +105,10 @@ def reduce(A, n):
 	:return: None
 	"""
 	A_red = []
-	for i in range(int(A.shape[0]/n)):
-		A_red.append(np.sum(A[i*n:(i+1)*n], axis=0))
+	with progressbar.ProgressBar(max_value=int(A.shape[0]/n)) as bar:
+		for i in range(int(A.shape[0]/n)):
+			A_red.append(np.sum(A[i*n:(i+1)*n], axis=0))
+			bar.update(i)
 
 	return np.array(A_red)
 
