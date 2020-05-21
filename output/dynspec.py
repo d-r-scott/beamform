@@ -36,7 +36,7 @@ def IQUV(x, y):
 def save_stokes_dynspec(x, y, frb):
 	"""
 	Generates X and Y dynamic spectra, calculates Stokes IQUV dynamic spectra, and saves IQUV to save on memory.
-	If one of the polarisations is not available, import y as 0.
+	If one of the polarisations is not available, import y as None.
 
 	:param x: Input x time series
 	:param y: Input y time series
@@ -61,9 +61,8 @@ def save_stokes_dynspec(x, y, frb):
 	for j, par in enumerate((i_ds, q_ds, u_ds, v_ds)):
 		print("Saving {}_ds_{}.npy".format(stk_str[j], frb))
 		np.save('{}_ds_{}.npy'.format(stk_str[j], frb), par)
-
-	# Delete the stokes parameters after we're done, as they tend to be big and we can read them later from disk
-	del i_ds, q_ds, u_ds, v_ds
+		# Delete once we're done with the parameter so it doesn't waste memory
+		del par
 
 def load_stokes_dynspec(frb):
 	"""
