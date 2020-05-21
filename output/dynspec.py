@@ -46,7 +46,7 @@ def save_stokes_dynspec(x, y, frb):
 	print("Generating x dynspec")
 	x_ds = generate_dynspec(x)
 
-	if y is not np.ndarray:
+	if y is None:
 		print("Y not given, setting to 0")
 		y_ds = 0
 	else:
