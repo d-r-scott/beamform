@@ -116,6 +116,7 @@ def plot_dynspec(dynspec,
 				 xmin=None, xmax=None, ymin=None, ymax=None,
 				 xlabel=None, ylabel=None,
 				 vmin=None, vmax=None,
+				 freq_range=None, tick_space=None, axis_res=None,
 				 cmap='inferno'
 ):
 	"""
@@ -131,6 +132,9 @@ def plot_dynspec(dynspec,
 	:param ylabel: Label for y (freq) axis
 	:param vmin: Minimum value for colormap
 	:param vmax: Maximum value for colormap
+	:param freq_range: 2-tuple (f_min, f_max) of ranges for nicer axis ticks
+	:param tick_space: 2-tuple (t_space, f_space) of tick frequency in pixels for nicer axis ticks
+	:param axis_res: 2-tuple (t_res, f_res) of axis resolutions (in ms and MHz respectively) for nicer axis ticks
 	:param cmap: Colormap to plot with [default: inferno]
 	:return: None
 	"""
@@ -150,16 +154,54 @@ def plot_dynspec(dynspec,
 	f_ax = plt.subplot2grid(ax_shape, (1, cols - 1), rowspan = rows - 1, sharey = ds_ax)	#freq series
 
 	ds_ax.imshow(dynspec, cmap=cmap, aspect='auto', vmin=vmin, vmax=vmax, origin='lower', interpolation='none')
-	ds_ax.set_xlim(left=xmin, right=xmax)
-	ds_ax.set_ylim(bottom=ymax, top=ymin)
-	ds_ax.set_xlabel(xlabel)
-	ds_ax.set_ylabel(ylabel)
 
 	t_ser = [ np.sum(dynspec[:, t]) for t in range(T) ]
 	t_ax.plot(range(T), t_ser, c='k', lw=0.5)
 
 	f_ser = [ np.sum(dynspec[f, :]) for f in range(F) ]
 	f_ax.plot(f_ser, range(F), c='k', lw=0.5)
+
+	# If freq_range, tick_space, and axis_res are given, make the tick marks nicer
+	if freq_range is not None and tick_space is not None and axis_res is not None:
+		f_min, f_max = freq_range
+		t_space, f_space = tick_space
+		t_res, f_res = axis_res
+
+		# Time axis
+		#	Axis positions - 10 pre- and post- peak of time series (peak is at 0), t_space apart
+		peak_idx = np.argmax(t_ser)
+		first_xtick = peak_idx - 10*t_space
+		last_xtick = peak_idx + 10*t_space
+
+		xticks = np.arange(first_xtick, last_xtick+1, t_space)
+		ds_ax.set_xticks(xticks)
+
+		#	Tick labels
+		xtick_labels = [ '%.0f'%(lbl) for lbl in np.arange(-10*t_space*t_res, 10*t_space*t_res+1, t_space*t_res) ]
+		ds_ax.set_xticklabels(xtick_labels)
+
+		# Frequency axis
+		#	Axis positions - One tick every f_space, on values where freq % f_res == 0
+		#					 i.e. if f_res == 25, put ticks at x00, x25, x50, x75...
+		#					 Once upon a time you wrote down why these are the way they are. I hope you kept your notes
+		#					 Hint: the terms with int in them are effectively floor and ceil
+		first_ytick = f_max - int(f_max/f_res)*f_res
+		last_ytick = (F-1) - ( (int(f_min/f_res + 1) * f_res) - f_min )
+
+		yticks = np.arange(last_ytick, first_ytick, -1*f_space)	# this is backwards because imshow be weird
+		ds_ax.set_yticks(yticks)
+
+		#	Tick labels
+		ytick_labels = [ '%.0f'%(lbl) for lbl in np.arange((int(f_min/f_space)+1) * f_space, int(f_max/f_space)*f_space+1, f_space*f_res) ]
+		ds_ax.set_yticklabels(ytick_labels)
+		
+	elif freq_range is not None or tick_space is not None or axis_res is not None:
+		print("ERROR: Need all of freq_range, tick_space, and axis_res to make axes nice!")
+
+	ds_ax.set_xlim(left=xmin+0.5, right=xmax-0.5)
+	ds_ax.set_ylim(bottom=ymax-0.5, top=ymin+0.5)
+	ds_ax.set_xlabel(xlabel)
+	ds_ax.set_ylabel(ylabel)
 
 	plt.tight_layout()
 	plt.show()
