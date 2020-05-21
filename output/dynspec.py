@@ -104,19 +104,21 @@ def reduce(A, n):
 	:param n: Factor to reduce by
 	:return: None
 	"""
-	A_red = []
-	with progressbar.ProgressBar(max_value=int(A.shape[0]/n)) as bar:
-		for i in range(int(A.shape[0]/n)):
-			A_red.append(np.sum(A[i*n:(i+1)*n], axis=0))
-			bar.update(i)
-
-	return np.array(A_red)
+	if n > 1:	# if n == 1 (or below, and is therefore invalid) don't bother reducing and just return the input
+		A_red = []
+		with progressbar.ProgressBar(max_value=int(A.shape[0]/n)) as bar:
+			for i in range(int(A.shape[0]/n)):
+				A_red.append(np.sum(A[i*n:(i+1)*n], axis=0))
+				bar.update(i)
+		return np.array(A_red)
+	else:
+		return(A)
 
 def plot_dynspec(dynspec,
 				 xmin=None, xmax=None, ymin=None, ymax=None,
 				 xlabel=None, ylabel=None,
 				 vmin=None, vmax=None,
-				 freq_range=None, tick_space=None, axis_res=None,
+				 freq_range=None, tick_space=None, axis_res=None, peak_idx=None,
 				 cmap='inferno'
 ):
 	"""
@@ -135,6 +137,7 @@ def plot_dynspec(dynspec,
 	:param freq_range: 2-tuple (f_min, f_max) of ranges for nicer axis ticks
 	:param tick_space: 2-tuple (t_space, f_space) of tick frequency in pixels for nicer axis ticks
 	:param axis_res: 2-tuple (t_res, f_res) of axis resolutions (in ms and MHz respectively) for nicer axis ticks
+	:param peak_idx: Index of burst peak
 	:param cmap: Colormap to plot with [default: inferno]
 	:return: None
 	"""
@@ -161,15 +164,14 @@ def plot_dynspec(dynspec,
 	f_ser = [ np.sum(dynspec[f, :]) for f in range(F) ]
 	f_ax.plot(f_ser, range(F), c='k', lw=0.5)
 
-	# If freq_range, tick_space, and axis_res are given, make the tick marks nicer
-	if freq_range is not None and tick_space is not None and axis_res is not None:
+	# If freq_range, tick_space, axis_res, and peak_idx are given, make the tick marks nicer
+	if freq_range is not None and tick_space is not None and axis_res is not None and peak_idx is not None:
 		f_min, f_max = freq_range
 		t_space, f_space = tick_space
 		t_res, f_res = axis_res
 
 		# Time axis
 		#	Axis positions - 10 pre- and post- peak of time series (peak is at 0), t_space apart
-		peak_idx = np.argmax(t_ser)
 		first_xtick = peak_idx - 10*t_space
 		last_xtick = peak_idx + 10*t_space
 
@@ -195,8 +197,8 @@ def plot_dynspec(dynspec,
 		ytick_labels = [ '%.0f'%(lbl) for lbl in np.arange((int(f_min/f_space)+1) * f_space, int(f_max/f_space)*f_space+1, f_space*f_res) ]
 		ds_ax.set_yticklabels(ytick_labels)
 		
-	elif freq_range is not None or tick_space is not None or axis_res is not None:
-		print("ERROR: Need all of freq_range, tick_space, and axis_res to make axes nice!")
+	elif freq_range is not None or tick_space is not None or axis_res is not None or peak_idx is not None:
+		print("ERROR: Need all of freq_range, tick_space, axis_res, and peak_idx to make axes nice!")
 
 	ds_ax.set_xlim(left=xmin+0.5, right=xmax-0.5)
 	ds_ax.set_ylim(bottom=ymax-0.5, top=ymin+0.5)
