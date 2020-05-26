@@ -42,6 +42,7 @@ def save_stokes_dynspec(x, y, frb):
 	"""
 	Generates X and Y dynamic spectra, calculates Stokes IQUV dynamic spectra, and saves IQUV to save on memory.
 	If one of the polarisations is not available, import y as None.
+	Also normalises and transposes the dynspec so that it's usable.
 
 	:param x: Input x time series
 	:param y: Input y time series
@@ -72,7 +73,7 @@ def save_stokes_dynspec(x, y, frb):
 
 	for stk in stk_str:
 		print(f'Calculating {stk}')
-		par = stokes[stk](x_ds, y_ds)
+		par = normalise(stokes[stk](x_ds, y_ds)).transpose()
 
 		print(f'Saving {stk}_ds_{frb}.npy')
 		np.save(f'{stk}_ds_{frb}.npy', par)
@@ -207,3 +208,19 @@ def plot_dynspec(dynspec,
 
 	plt.tight_layout()
 	plt.show()
+
+def normalise(ds):
+	"""
+	Normalises a dynamic spectrum along frequency channels to cancel out RFI
+
+	:param ds: Input dynspec to normalise
+	"""
+	T, F = ds.shape
+	out_ds = ds.copy()
+	norm = lambda x: (x - np.mean(x))/np.std(x)
+	with progressbar.ProgressBar(max_value = F) as bar:
+		for f in range(F):
+			out_ds[:,f] = norm(ds[:,f])
+			bar.update(f)
+	del ds
+	return out_ds
