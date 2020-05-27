@@ -4,7 +4,6 @@ A collection of functions for creating, manipulating, and plotting dynamic spect
 
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 import progressbar
 
 def generate_dynspec(t_ser):
@@ -38,26 +37,17 @@ def IQUV(x, y):
 	v = 2*np.imag(np.conj(x) * y)
 	return i, q, u, v
 
-def save_stokes_dynspec(x, y, frb):
+def save_stokes_dynspec(x_ds, y_ds, frb):
 	"""
 	Generates X and Y dynamic spectra, calculates Stokes IQUV dynamic spectra, and saves IQUV to save on memory.
 	If one of the polarisations is not available, import y as None.
 	Also normalises and transposes the dynspec so that it's usable.
 
-	:param x: Input x time series
-	:param y: Input y time series
+	:param x_ds: Input x dynspec
+	:param y_ds: Input y dynspec
 	:param frb: String with name of FRB, for the filenames
 	:return: None
 	"""
-	print("Generating x dynspec")
-	x_ds = generate_dynspec(x)
-
-	if y is None:
-		print("Y not given, setting to 0")
-		y_ds = 0
-	else:
-		print("Generating y dynspec")
-		y_ds = generate_dynspec(y)
 
 	print("Calculating Stokes parameters")
 
@@ -73,11 +63,15 @@ def save_stokes_dynspec(x, y, frb):
 
 	for stk in stk_str:
 		print(f'Calculating {stk}')
-		par = normalise(stokes[stk](x_ds, y_ds)).transpose()
+		par = stokes[stk](x_ds, y_ds)
+		par_norm = normalise(par)
+		del par
+		par_tran = par_norm.transpose()
+		del par_norm
 
 		print(f'Saving {stk}_ds_{frb}.npy')
-		np.save(f'{stk}_ds_{frb}.npy', par)
-		del par
+		np.save(f'{stk}_ds_{frb}.npy', par_tran)
+		del par_tran
 
 def load_stokes_dynspec(frb, dir=None):
 	"""
