@@ -69,13 +69,13 @@ def get_sn(dynspec, w):
 	return max(sum_prof)
 
 
+
 def opt_f(x):
-	#DM = x[0]
 	DM = x
-	#print(DM)
 	w = int(values.w/values.dt)
-	#return -1*get_sn(dedisperse(in_dynspec, DM), w)
-	return get_sn(dedisperse(in_dynspec, DM), w)
+
+	sn = get_sn(dedisperse(in_dynspec, DM), w)
+	return sn
 
 
 def do_opt():
@@ -116,7 +116,8 @@ def do_opt():
 	plt.plot(DMs, sns)
 	plt.show()
 	opt_dynspec = dedisperse(in_dynspec, opt_DM)
-	ds.plot_dynspec(opt_dynspec)
+	opt_dynspec_red = ds.reduce(opt_dynspec, int(500/values.dt), transpose=True)
+	ds.plot_dynspec(opt_dynspec_red, freq_range=(862.5-336/2, 862.5+336/2), tick_space=(20, 50), axis_res=(0.5, 1), peak_idx=np.argmax(np.sum(opt_dynspec_red, axis=0)))
 	np.save(values.o, opt_dynspec)
 
 if __name__ == '__main__':
