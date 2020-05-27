@@ -96,22 +96,25 @@ def load_stokes_dynspec(frb, dir=None):
 	return ret
 
 
-def reduce(A, n):
+def reduce(A, n, transpose=False):
 	"""
 	Reduces the time resolution of a given array by a factor n.
 	Reduces along the 0th axis, make sure this one is the time axis!
 
 	:param A: Input array to be reduced
 	:param n: Factor to reduce by
+	:param transpose: Does the function need to transpose the array before reducing? Set to True iff axis 0 is not time
 	:return: None
 	"""
+
 	if n > 1:	# if n == 1 (or below, and is therefore invalid) don't bother reducing and just return the input
+		A = A.transpose() if transpose else A
 		A_red = []
 		with progressbar.ProgressBar(max_value=int(A.shape[0]/n)) as bar:
 			for i in range(int(A.shape[0]/n)):
 				A_red.append(np.sum(A[i*n:(i+1)*n], axis=0))
 				bar.update(i)
-		return np.array(A_red)
+		return np.array(A_red).transpose() if transpose else np.array(A_red)
 	else:
 		return(A)
 
