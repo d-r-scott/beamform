@@ -43,6 +43,7 @@ def deripple(FFFF, fftLength = 1048576, quiet=False, bw=336):
 
 def coh_dedisp(FFFF, DM, f_mid=1320.5, bw=336, quiet=False):
 	nSam = len(FFFF)
+	k_DM = 4148.808
 
 	# ASKAP Parameters
 	f_start = f_mid - float(bw)/2 #1153.
@@ -50,7 +51,7 @@ def coh_dedisp(FFFF, DM, f_mid=1320.5, bw=336, quiet=False):
 	
 	if not quiet:
 		print('dedispersing....')
-	dedisperse = np.exp(2j*np.pi*DM/2.41e-4*np.array([(f-f_mid)**2/f_mid**2/f*1e6 for f in np.linspace(f_stop,f_start,nSam)]))
+	dedisperse = np.exp(2j*np.pi*DM*k_DM*np.array([(f-f_mid)**2/f_mid**2/f*1e6 for f in np.linspace(f_stop,f_start,nSam)]))
 	#print('dedispersing wrong....')
 	#dedisperse = np.exp(2j*np.pi*DM*4150*np.array([(1/f**2-1/f_mid**2)*f*1e6 for f in np.linspace(f_stop,f_start,nSam)]))
 
