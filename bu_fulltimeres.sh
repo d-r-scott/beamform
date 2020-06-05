@@ -40,6 +40,7 @@ if [ "$hwfile" != "" ]; then
   args1="$args1 $hwfile"
 fi
 
+# TODO: Need to put this in a for loop for all antennae
 echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1"
 jobid1=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 | cut -d " " -f 4)
 
@@ -59,7 +60,7 @@ jobid3=$(sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3
 
 # Stage 4: Dedispersion
 out4=${logpre}_stage4.out
-args4="$FRB $pol"
+args4="$FRB $pol $DM $f0"
 
 echo "sbatch --output=$out4 --error=$out4 --dependency=afterok:$jobid3 stage4_dedispersion.sh $args4"
 jobid4=$(sbatch --output=$out4 --error=$out4 --dependency=afterok:$jobid3 stage4_dedispersion.sh $args4 | cut -d " " -f 4)
