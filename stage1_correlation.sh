@@ -20,6 +20,7 @@ hwfile=$9   # Hardware delays. Probably not there for newer FRBs.
 # Processing parameters
 i=1
 n=40960   # $n * 54 * 336 is the total length of the output array. Try to make n % 32 == 0.
+export fftlen=$(( $n * 64 ))  # export for use by the derippling stage
 
 # Get data directories
 source dir_vars.sh $FRB

@@ -52,7 +52,7 @@ jobid2=$(sbatch --output=$out2 --error=$out2 --dependency=afterok:$jobid1 stage2
 
 # Stage 3: Derippling
 out3=${logpre}_stage3.out
-args3="$FRB $pol"
+args3="$FRB $pol $fftlen"   # fftlen was exported by stage1_correlation.sh
 
 echo "sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3"
 jobid3=$(sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3 | cut -d " " -f 4)
