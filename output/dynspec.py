@@ -5,6 +5,7 @@ A collection of functions for creating, manipulating, and plotting dynamic spect
 import numpy as np
 import matplotlib.pyplot as plt
 import progressbar
+import gc
 
 def generate_dynspec(t_ser):
 	"""
@@ -37,7 +38,7 @@ def IQUV(x, y):
 	v = 2*np.imag(np.conj(x) * y)
 	return i, q, u, v
 
-def save_stokes_dynspec(x_ds, y_ds, frb):
+def save_stokes_dynspec(x_ds, y_ds, frb, dir=None):
 	"""
 	Generates X and Y dynamic spectra, calculates Stokes IQUV dynamic spectra, and saves IQUV to save on memory.
 	If one of the polarisations is not available, import y as None.
@@ -48,6 +49,9 @@ def save_stokes_dynspec(x_ds, y_ds, frb):
 	:param frb: String with name of FRB, for the filenames
 	:return: None
 	"""
+
+	if dir is None:
+		dir=frb
 
 	print("Calculating Stokes parameters")
 
@@ -70,8 +74,9 @@ def save_stokes_dynspec(x_ds, y_ds, frb):
 		del par_norm
 
 		print(f'Saving {stk}_ds_{frb}.npy')
-		np.save(f'{stk}_ds_{frb}.npy', par_tran)
+		np.save(f'{dir}/{stk}_ds_{frb}.npy', par_tran)
 		del par_tran
+		gc.collect()
 
 def load_stokes_dynspec(frb, dir=None):
 	"""

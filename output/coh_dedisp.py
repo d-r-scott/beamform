@@ -14,6 +14,7 @@ def _main():
 	process(args.x, 'x', args)
 	process(args.y, 'y', args)
 
+
 def get_args():
 	"""
 	Get arguments from command line
@@ -79,6 +80,7 @@ def process(fname, xy, args):
 		save(t_dd_ds, args.o, xy, 't', args.DM, True)
 	del t_dd_ds
 	gc.collect()
+
 
 if __name__ == '__main__':
 	_main()
