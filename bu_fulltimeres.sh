@@ -5,6 +5,9 @@ FRB=$1      # FRB name
 a_or_m=$2   # AIPS or MIRIAD solutions for correlation
 pol=$3      # Polarisation (x or y)
 
+# KEY DIFFERENCE BETWEEN THIS VERSION AND HYERIN'S ORIGINAL VERSION:
+# Antenna number is not specified, all antennas are always processed
+
 logdir=./log          # Directory for log files
 logpre=${logdir}/${FRB}_${pol}
 
@@ -22,7 +25,21 @@ echo "f_vcraft=	$f_vcraft"
 
 # Stage 1: Per-antenna correlation
 out1=${logpre}_stage1.out
-args1="$FRB $a_or_m $pol"
+
+args1="$FRB $a_or_m $pol $offset $calcfile $fcm $f_vcraft"
+if [ "$a_or_m" == "AIPS" ]; then
+  args1="$args1 $aips"
+elif [ "$a_or_m" == "MIRIAD" ]; then
+  args1="$args1 $mir"
+else
+  echo "ERROR: Must provide AIPS or MIRIAD exactly!"
+  echo "Exiting..."
+  exit
+fi
+if [ "$hwfile" != "" ]; then
+  args1="$args1 $hwfile"
+fi
+
 echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1"
 jobid1=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 | cut -d " " -f 4)
 
