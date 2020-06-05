@@ -1,0 +1,14 @@
+output/__pycache__/
+__pycache__/
+generate_deripple.pyc
+DM-opt/__pycache__/
+.idea/
+*npy
+*/*npy
+/output/181112
+/output/190714
+/output/200430
+/output/200430_0602
+/output/200430_0604
+/DM-opt/200430
+/DM-opt/200430_0604
