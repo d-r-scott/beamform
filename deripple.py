@@ -18,7 +18,7 @@ def get_args():
 	parser.add_argument('-f', help='Fine spectrum file')
 	parser.add_argument('-l', type=int, help='FFT length')
 	parser.add_argument('-o', help='Output file')
-
+	return parser.parse_args()
 
 def load(fname):
 	return np.load(fname)
