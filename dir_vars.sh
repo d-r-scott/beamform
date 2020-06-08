@@ -5,7 +5,7 @@
 FRB=$1
 
 basedir=./output
-outdir=${basedir}/{FRB}
+outdir=${basedir}/${FRB}
 f_outdir=${outdir}/f
 
 if [ ! -d $outdir ]; then
