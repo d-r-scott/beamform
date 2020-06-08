@@ -15,8 +15,8 @@ calcfile=$5
 fcm=$6
 f_vcraft=$7
 a_m_file=$8 # AIPS/MIRIAD file (both are in this variable, the contents depends on $a_or_m
-hwfile=$9   # Hardware delays. Probably not there for newer FRBs.
-ant=$10     # Antenna number
+ant=$9      # Antenna number
+hwfile=${10}   # Hardware delays. Probably not there for newer FRBs.
 
 # Processing parameters
 i=1
