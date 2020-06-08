@@ -13,8 +13,8 @@ pol=$3      # Polarisation (x or y)
 offset=$4   # Data offset (how many microseconds at the start to skip)
 calcfile=$5
 fcm=$6
-f_vcraft="$7"
-a_m_file=$8 # AIPS/MIRIAD file (both are in this variable, the contents depends on $a_or_m
+a_m_file=$7 # AIPS/MIRIAD file (both are in this variable, the contents depends on $a_or_m
+f_vcraft=$8
 ant=$9      # Antenna number
 hwfile=${10}   # Hardware delays. Probably not there for newer FRBs.
 
