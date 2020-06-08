@@ -20,6 +20,7 @@ def get_args():
 
 
 def load(fname):
+	print(f'Loading {fname}')
 	return np.load(fname)
 
 
@@ -27,8 +28,27 @@ def dedisperse(f, DM, f0, bw):
 	"""
 	Takes heavy inspiration from Hyerin Cho's coh_dedisp function from freq2time.py
 	"""
+	print('Dedispersing')
+
 	n_sam = len(f)
 	k_DM = 4818.808
+
+	f_min = f0 - float(bw)/2
+	f_max = f0 + float(bw)/2
+
+	# TODO: figure out why Hyerin put f_max and f_min in this order
+	freqs = np.linspace(f_max, f_min, n_sam)
+
+	dedisp_phases = np.exp(2j*np.pi*DM*k_DM*((freqs-f0)**2/f0**2/freqs*1e6))
+
+	f *= dedisp_phases
+
+	return f
+
+
+def save(f_dd, fname):
+	print(f'Saving {fname}')
+	np.save(fname, f_dd)
 
 
 if __name__ == '__main__':

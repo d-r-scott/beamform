@@ -19,7 +19,7 @@ source dir_vars.sh $FRB
 source modules.sh
 module load $modules_4
 
-args=""
+args="-f ${output}/${FRB}_sum_${pol}_f_derippled.npy --DM $DM --f0 $f0 --bw 336"
 
 echo "python3 dedisperse.py $args"
 python3 dedisperse.py $args
