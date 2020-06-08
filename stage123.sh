@@ -41,10 +41,10 @@ if [ "$hwfile" != "" ]; then
   args1="$args1 $hwfile"
 fi
 
-max_ant=$(( $n_ant - 1 ))
+max_ant=$(( n_ant - 1 ))
 jobid1=""
 # TODO: Need to put this in a for loop for all antennae
-for ant in {0..$max_ant}; do
+for ant in `seq 0 $max_ant`; do
   echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1"
   new_jobid=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 | cut -d " " -f 4)
   jobid1="$jobid1:$newjobid"
