@@ -37,7 +37,10 @@ module load $modules_1
 
 outfile=${f_outdir}/${FRB}_${ant}_${pol}_f.npy
 
+echo "$offset"
+
 args="-i $i -n $n --offset $offset --calcfile $calcfile --parset $fcm"
+echo "$args"
 if [ "$a_or_m" == "AIPS" ]; then
   args="$args --aips_c $a_m_file"
 else
@@ -47,6 +50,7 @@ if [ "$hwfile" != "" ]; then
   args="$args --hwfile $hwfile"
 fi
 args="$args --an $ant -o $outfile"
+echo "$args"
 
 echo "python craftcor_tab.py $args --tab $f_vcraft"
 python craftcor_tab.py $args --tab $f_vcraft
