@@ -16,6 +16,7 @@ fcm=$6
 f_vcraft=$7
 a_m_file=$8 # AIPS/MIRIAD file (both are in this variable, the contents depends on $a_or_m
 hwfile=$9   # Hardware delays. Probably not there for newer FRBs.
+ant=$10     # Antenna number
 
 # Processing parameters
 i=1
@@ -29,6 +30,8 @@ source dir_vars.sh $FRB
 source modules.sh
 module load $modules_1
 
+outfile=${f_outdir}/${FRB}_${ant}_${pol}_f.npy
+
 args="-i $i -n $n --offset $offset --calcfile $calcfile --parset $fcm --tab $f_vcraft"
 if [ "$a_or_m" == "AIPS" ]; then
   args="$args --aips_c $a_m_file"
@@ -38,7 +41,7 @@ fi
 if [ "$hwfile" != "" ]; then
   args="$args --hwfile $hwfile"
 fi
-args="$args -o $f_outdir"
+args="$args --an $ant -o $outfile"
 
 echo "python craftcor_tab.py $args"
 python craftcor_tab.py $args

@@ -4,6 +4,7 @@
 FRB=$1      # FRB name
 a_or_m=$2   # AIPS or MIRIAD solutions for correlation
 pol=$3      # Polarisation (x or y)
+n_ant=$4    # Number of antennae there is for this FRB
 
 # KEY DIFFERENCE BETWEEN THIS VERSION AND HYERIN'S ORIGINAL VERSION:
 # Antenna number is not specified, all antennas are always processed
@@ -40,9 +41,14 @@ if [ "$hwfile" != "" ]; then
   args1="$args1 $hwfile"
 fi
 
+max_ant=$(( $n_ant - 1 ))
+jobid1=""
 # TODO: Need to put this in a for loop for all antennae
-echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1"
-jobid1=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 | cut -d " " -f 4)
+for ant in {0..$max_ant}; do
+  echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1"
+  new_jobid=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 | cut -d " " -f 4)
+  jobid1="$jobid1:$newjobid"
+done
 
 # Stage 2: Summing fine channel spectra
 out2=${logpre}_stage2.out

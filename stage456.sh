@@ -40,4 +40,4 @@ out5=${logpre}_stage6.out
 args6="$FRB $DM"
 
 echo "sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobidy5_x,$jobid5_y stage6_dynspecs.sh $args6"
-sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobidy5_x,$jobid5_y stage6_dynspecs.sh $args6
+sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobidy5_x:$jobid5_y stage6_dynspecs.sh $args6
