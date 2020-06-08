@@ -7,13 +7,12 @@ basedr2=/fred/oz002/users/hcho/craft/
 
 # Should be two arguments:
 # source FRBdata.sh [FRB name] [AIPS or MIRIAD] [Polarisation (x/y)] [antenna]
-if (( $# != 4 )); then
-	echo "ERROR: Usage: source FRBdata.sh [FRB name] [AIPS or MIRIAD] [Polarisation (x/y)] [antenna]"
+if (( $# != 3 )); then
+	echo "ERROR: Usage: source FRBdata.sh [FRB name] [AIPS or MIRIAD] [Polarisation (x/y)]"
 else
 	FRB=$1
 	a_or_m=$2
 	pol=$3
-	an=$4
 
 	if [ "$FRB" == "180924" ]; then
 		offset=1874193
