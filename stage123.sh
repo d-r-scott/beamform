@@ -56,18 +56,4 @@ out3=${logpre}_stage3.out
 args3="$FRB $pol $fftlen"   # fftlen was exported by stage1_correlation.sh
 
 echo "sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3"
-jobid3=$(sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3 | cut -d " " -f 4)
-
-# Stage 4: Dedispersion
-out4=${logpre}_stage4.out
-args4="$FRB $pol $DM $f0"
-
-echo "sbatch --output=$out4 --error=$out4 --dependency=afterok:$jobid3 stage4_dedispersion.sh $args4"
-jobid4=$(sbatch --output=$out4 --error=$out4 --dependency=afterok:$jobid3 stage4_dedispersion.sh $args4 | cut -d " " -f 4)
-
-# Stage 5: IFFT
-out5=${logpre}_stage5.out
-args5="$FRB $pol"
-
-echo "sbatch --output=$out5 --error=$out5 --dependency=afterok:$jobid4 stage5_ifft.sh $args5"
-sbatch --output=$out5 --error=$out5 --dependency=afterok:$jobid4 stage5_ifft.sh $args5
+sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3
