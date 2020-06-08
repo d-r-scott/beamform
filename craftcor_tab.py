@@ -4,7 +4,7 @@ Tied-array beamforming vcraft files, based on "craftcor.py".
 
 Copyright (C) CSIRO 2017
 """
-import pylab
+#import pylab
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np

@@ -11,17 +11,21 @@ def _main():
 	
 	# Check we have a valid polarisation
 	if args.p in ('x', 'y', 'both'):
-		x_fnames, y_fnames = find_files(args.FRB, args.p)
+		x_f_fnames, y_f_fnames, x_t_fnames, y_t_fnames = find_files(args.FRB, args.p)
 
 		# the above will either be lists of filenames or None, depending on if we're doing that polarisation
 
-		if x_fnames is not None:
-			x_sum = do_sum(x_fnames)
-			save(x_sum, args.o, 'x_')
+		if x_f_fnames is not None:
+			#x_f_sum = do_sum(x_f_fnames)
+			#save(x_f_sum, args.o, 'x_f_')
+			x_t_sum = do_sum(x_t_fnames)
+			save(x_t_sum, args.o, 'x_t_')
 
-		if y_fnames is not None:
-			y_sum = do_sum(y_fnames)
-			save(y_sum, args.o, 'y_')
+		if y_f_fnames is not None:
+			#y_f_sum = do_sum(y_f_fnames)
+			#save(y_f_sum, args.o, 'y_f_')
+			y_t_sum = do_sum(y_t_fnames)
+			save(y_t_sum, args.o, 'y_t_')
 
 	else:
 		print("Invalid polarisation")
@@ -32,25 +36,29 @@ def get_args():
 	parser.add_argument(dest='FRB', type=str, help='FRB to sum')
 	#parser.add_argument('-c', type='store_true', help='Use cropped time series instead of full', default=False)
 	# TODO: Implement -c flag
-	parser.add_argument('-o', type=str, help='Output filename (polarisation will be appended as prefix)', default='sum_t.npy')
+	parser.add_argument('-o', type=str, help='Output filename (polarisation and t/f will be appended as prefix)', default='sum_t.npy')
 	parser.add_argument('-p', type=str, help='Polarisation to do (default is both)', default='both')
 
 	return parser.parse_args()
 
 def find_files(FRB, p):
-	glob_str_x = '{}/*x*t.npy'.format(FRB)
-	glob_str_y = '{}/*y*t.npy'.format(FRB)
+	glob_str_x_f = '{}/*x*f.npy'.format(FRB)
+	glob_str_y_f = '{}/*y*f.npy'.format(FRB)
+	glob_str_x_t = '{}/*x*t.npy'.format(FRB)
+	glob_str_y_t = '{}/*y*t.npy'.format(FRB)
 
-	x_fnames = glob.glob(glob_str_x)
-	y_fnames = glob.glob(glob_str_y)
+	x_f_fnames = glob.glob(glob_str_x_f)
+	y_f_fnames = glob.glob(glob_str_y_f)
+	x_t_fnames = glob.glob(glob_str_x_t)
+	y_t_fnames = glob.glob(glob_str_y_t)
 
 	if p == 'both':
 		# Return lists for x and y
-		return x_fnames, y_fnames
+		return x_f_fnames, y_f_fnames, x_t_fnames, y_t_fnames
 	elif p == 'x':
-		return x_fnames, None
+		return x_f_fnames, None, x_t_fnames, None
 	else:	# must be 'y'
-		return None, y_fnames
+		return None, y_f_fnames, None, y_t_fnames
 
 def do_sum(fnames):
 	# Sum one file at a time, since they're very large

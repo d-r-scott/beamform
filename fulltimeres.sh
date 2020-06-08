@@ -34,7 +34,7 @@ args=()
 
 ## set array size and offset
 i=1
-n=40960 # $n * 54 * 336 is the total length of the output array
+n=46304 # $n * 54 * 336 is the total length of the output array
 
 source FRBdata.sh $FRB $a_or_m $pol $an
 echo ""
@@ -77,8 +77,9 @@ fi
 args+=("-o $f_outfile")
 
 # PART 1
-echo "python craftcor_tab.py ${args[@]} --tab $f_vcraft"
-python craftcor_tab.py ${args[@]} --tab $f_vcraft
+echo "Skipping part 1..."
+#echo "python craftcor_tab.py ${args[@]} --tab $f_vcraft"
+#python craftcor_tab.py ${args[@]} --tab $f_vcraft
 
 
 # PART 2

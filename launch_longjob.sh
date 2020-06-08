@@ -39,9 +39,9 @@ if [ $mode = recon ]; then
 
   for (( iant=0; iant<$nant; iant++ )); do
     fn=${here}/log/recon${iant}${pol}_${frb}.log
-    t=3:00:00
-    mem=100g
-    jobname=${iant}recon
+    t=1:30:00
+    mem=64g
+    jobname=${iant}${pol}recon
 
     echo "sbatch --job-name=${jobname} --output=${fn} --error=${fn} --time=${t} --mem=${mem} $script $iant $frb $a_or_m $pol"
     sbatch --job-name=${jobname} --output=${fn} --error=${fn} --time=${t} --mem=${mem} $script $iant $frb $a_or_m $pol

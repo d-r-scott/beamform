@@ -170,8 +170,8 @@ else
 
 
 	elif [ "$FRB" == "200430" ]; then
-		offset=1000000
-		DM=380.25
+		offset=256000
+		DM=381.045
 		f0=864.5
 		calcfile="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/craftfrb_139162.im"
 		fcm="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/fcm.txt"
