@@ -33,7 +33,7 @@ source modules.sh
 module load $modules_1
 
 outfile=${f_outdir}/${FRB}_${ant}_${pol}_f.npy
-
+echo $outfile
 echo "$offset"
 
 args="-i $i -n $n --offset $offset --calcfile $calcfile --parset $fcm"
