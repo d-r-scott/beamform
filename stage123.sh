@@ -52,7 +52,7 @@ done
 out2=${logpre}_stage2.out
 args2="$FRB $pol"
 
-echo "sbatch --output=$out2 --error=$out2 --dependency=afterok:$jobid1 stage2_summing.sh $args2"
+echo "sbatch --output=$out2 --error=$out2 --dependency=afterok$jobid1 stage2_summing.sh $args2"
 jobid2=$(sbatch --output=$out2 --error=$out2 --dependency=afterok$jobid1 stage2_summing.sh $args2 | cut -d " " -f 4)
 
 # Stage 3: Derippling
