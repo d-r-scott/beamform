@@ -96,12 +96,9 @@ def do_opt():
 	"""
 	DMs = np.arange(DM_min, DM_max, values.prec)
 
-	def process_DMs(DM):
-		return opt_f(DM)
-
 	num_cores = multiprocessing.cpu_count()
 
-	sns = Parallel(n_jobs=num_cores-1)(delayed(process_DMs)(DM) for DM in DMs)
+	sns = Parallel(n_jobs=num_cores-1)(delayed(opt_f)(DM) for DM in DMs)
 
 	"""""
 	with pb.ProgressBar(max_value=len(sns)) as bar:
