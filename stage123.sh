@@ -12,6 +12,19 @@ n_ant=$4    # Number of antennae there is for this FRB
 logdir=./log          # Directory for log files
 logpre=${logdir}/${FRB}_${pol}
 
+# Create data directories
+basedir=./output
+outdir=${basedir}/${FRB}
+f_outdir=${outdir}/f
+
+if [ ! -d $outdir ]; then
+  mkdir $outdir
+fi
+
+if [ ! -d $f_outdir ]; then
+  mkdir $f_outdir
+fi
+
 source FRBdata.sh $FRB $a_or_m $pol
 echo "FRB$FRB"
 echo "offset=		$offset"

@@ -11,8 +11,10 @@ FRB=$1  # FRB name
 pol=$2  # Polarisation (x or y)
 DM=$3   # Dispersion measure in pc/cm3
 
-# Get data directories
-source dir_vars.sh $FRB
+# Set data directories
+basedir=./output
+outdir=${basedir}/${FRB}
+f_outdir=${outdir}/f
 
 # Get modules to load and load them
 source modules.sh

@@ -18,18 +18,15 @@ a_m_file=$8 # AIPS/MIRIAD file (both are in this variable, the contents depends 
 ant=$9      # Antenna number
 hwfile=${10}   # Hardware delays. Probably not there for newer FRBs.
 
-echo "+++++++"
-echo "$FRB $a_or_m $pol $offset $calcfile $fcm $f_vcraft $a_m_file $ant $hwfile"
-echo "+++++++"
-echo ""
-
 # Processing parameters
 i=1
 n=40960   # $n * 54 * 336 is the total length of the output array. Try to make n % 32 == 0.
 export fftlen=$(( $n * 64 ))  # export for use by the derippling stage
 
-# Get data directories
-source dir_vars.sh $FRB
+# Set data directories - stage123.sh has already ensured they exist
+basedir=./output
+outdir=${basedir}/${FRB}
+f_outdir=${outdir}/f
 
 # Get modules to load and load them
 source modules.sh

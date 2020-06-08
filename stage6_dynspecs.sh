@@ -10,8 +10,10 @@
 FRB=$1  # FRB name
 DM=$2   # Dispersion measure in pc/cm3
 
-# Get data directories
-source dir_vars.sh $FRB
+# Set data directories
+basedir=./output
+outdir=${basedir}/${FRB}
+f_outdir=${outdir}/f
 
 # Get modules to load and load them
 source modules.sh
