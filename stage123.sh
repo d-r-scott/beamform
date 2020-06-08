@@ -47,7 +47,7 @@ jobid1=""
 for ant in `seq 0 $max_ant`; do
   echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1"
   new_jobid=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 | cut -d " " -f 4)
-  jobid1="$jobid1:$newjobid"
+  jobid1="$jobid1:$new_jobid"
 done
 
 # Stage 2: Summing fine channel spectra
