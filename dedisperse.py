@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 def _main():
 	args = get_args()
 	f = load(args.f)
@@ -16,6 +17,7 @@ def get_args():
 	parser.add_argument('--DM', type=float, help='Dispersion measure to dedisperse to in pc/cm3')
 	parser.add_argument('--f0', type=float, help='Central frequency of observation in MHz')
 	parser.add_argument('--bw', type=float, help='Bandwidth of observation in MHz', default=336)
+	parser.add_argument('-o', help='Output file to save dedispersed spectrum to')
 	return parser.parse_args()
 
 

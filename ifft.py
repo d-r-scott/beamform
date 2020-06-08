@@ -31,3 +31,7 @@ def do_ifft(f):
 def save(t, fname):
 	print(f'Saving {fname}')
 	np.save(fname, t)
+
+
+if __name__ == '__main__':
+	_main()
