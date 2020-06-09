@@ -19,7 +19,7 @@ f_outdir=${outdir}/f
 source modules.sh
 module load $modules_6
 
-args="-x ${outdir}/${FRB}_sum_x_t_${DM}.npy -y ${outdir}/${FRB}_sum_y_t_${DM}.npy -o ${outdir}/${FRB}_sum_@_dynspec_${DM}.npy"
+args="-x ${outdir}/${FRB}_sum_x_t_${DM}.npy -y ${outdir}/${FRB}_sum_y_t_${DM}.npy -o ${outdir}/${FRB}_sum_!_@_${DM}.npy"
 
 echo "python3 dynspecs.py $args"
 python3 dynspecs.py $args
