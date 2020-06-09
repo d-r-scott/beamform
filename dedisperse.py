@@ -37,7 +37,7 @@ def dedisperse(f, DM, f0, bw):
 	print('Dedispersing')
 
 	n_sam = len(f)
-	k_DM = 4818.808
+	k_DM = 4148.808
 
 	f_min = f0 - float(bw)/2
 	f_max = f0 + float(bw)/2

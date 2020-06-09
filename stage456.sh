@@ -10,8 +10,8 @@ logpre=${logdir}/${FRB}
 
 source FRBdata.sh $FRB $a_or_m $pol
 echo "FRB$FRB"
-echo "DM=		$DM"
-echo "f0=		$f0"
+echo "DM= $DM"
+echo "f0= $f0"
 
 # Stage 4: Dedispersion
 out4=${logpre}_stage4.out
