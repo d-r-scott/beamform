@@ -13,7 +13,7 @@ def _main():
 	sum_f_deripple = deripple(sum_f, fftLength=args.l)
 	save(sum_f_deripple, args.o)
 	end = time.time()
-	print(f'deripple.py finished in {end-start} s')
+	print 'deripple.py finished in {} s'.format(end-start)
 
 
 def get_args():
