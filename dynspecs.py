@@ -97,3 +97,7 @@ def normalise(ds):
 		out_ds[:,f] = norm(ds[:,f])
 	del ds
 	return out_ds
+
+
+if __name__ == '__main__':
+	_main()
