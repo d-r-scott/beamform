@@ -3,7 +3,7 @@
 #SBATCH --job-name=correlation
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=1:00:00
+#SBATCH --time=0:15:00
 #SBATCH --mem=32g
 
 # Command line arguments
@@ -14,14 +14,11 @@ offset=$4   # Data offset (how many microseconds at the start to skip)
 calcfile=$5
 fcm=$6
 a_m_file=$7 # AIPS/MIRIAD file (both are in this variable, the contents depends on $a_or_m
-f_vcraft=$8
-ant=$9      # Antenna number
-hwfile=${10}   # Hardware delays. Probably not there for newer FRBs.
-
-# Processing parameters
-i=1
-n=40960   # $n * 54 * 336 is the total length of the output array. Try to make n % 32 == 0.
-export fftlen=$(( $n * 64 ))  # export for use by the derippling stage
+i=$8
+n=$9
+f_vcraft=${10}
+ant=${11}      # Antenna number
+hwfile=${12}   # Hardware delays. Probably not there for newer FRBs.
 
 # Set data directories - stage123.sh has already ensured they exist
 basedir=./output

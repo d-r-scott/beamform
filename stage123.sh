@@ -52,6 +52,13 @@ else
 fi
 # We'll add hwfile in inside stage1_correlation.sh
 
+# Processing parameters
+i=1
+n=40960		# $n * 54 * 336 is the total length of the output array. Try to make n % 32 == 0
+fftlen=$(( $n * 64 ))
+
+args1="$args1 $i $n"
+
 max_ant=$(( n_ant - 1 ))
 jobid1=""
 # TODO: Need to put this in a for loop for all antennae
