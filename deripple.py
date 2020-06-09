@@ -70,5 +70,5 @@ def save(f, fname):
 	np.save(fname, f)
 
 
-if __name__='__main__':
+if __name__ == '__main__':
 	_main()
