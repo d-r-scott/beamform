@@ -3,8 +3,8 @@
 #SBATCH --job-name=dedispersion
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=1:00:00
-#SBATCH --mem=32g
+#SBATCH --time=0:10:00
+#SBATCH --mem=64g
 
 # Command line arguments
 FRB=$1  # FRB name
