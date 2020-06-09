@@ -5,15 +5,19 @@ Sums time series together for a given FRB
 import numpy as np
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import glob
+import time
 
 
 def _main():
+	start = time.time()
 	args = get_args()
 	
 	fnames = find_files(args.f_dir, args.f, args.p)
 
 	sum = do_sum(fnames)
 	save(sum, args.o)
+	end = time.time()
+	print(f'sum.py completed in {end-start} s')
 
 
 def get_args():

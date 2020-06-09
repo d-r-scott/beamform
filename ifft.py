@@ -2,12 +2,17 @@
 
 import numpy as np
 from scipy.fft import ifft
+import time
+
 
 def _main():
+	start = time.time()
 	args = get_args()
 	f = load(args.f)
 	t = do_ifft(f)
 	save(t, args.o)
+	end = time.time()
+	print(f'ifft.py finished in {end-start} s')
 
 
 def get_args():

@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import time
 
 
 def _main():
+	start = time.time()
 	args = get_args()
 	f = load(args.f)
 	f_dd = dedisperse(f, args.DM, args.f0, args.bw)
 	save(f_dd, args.o)
+	end = time.time()
+	print(f'dedisperse.py finished in {end-start} s')
 
 
 def get_args():

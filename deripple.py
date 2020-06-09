@@ -3,13 +3,17 @@
 import numpy as np
 from scipy.interpolate import interp1d
 import os
+import time
 
 
 def _main():
+	start = time.time()
 	args = get_args()
 	sum_f = load(args.f)
 	sum_f_deripple = deripple(sum_f, fftLength=args.l)
 	save(sum_f_deripple, args.o)
+	end = time.time()
+	print(f'deripple.py finished in {end-start} s')
 
 
 def get_args():
