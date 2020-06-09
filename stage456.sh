@@ -36,8 +36,8 @@ echo "sbatch --output=$out5 --error=$out5 --dependency=afterok:$jobid4_y stage5_
 jobid5_y=$(sbatch --output=$out5 --error=$out5 --dependency=afterok:$jobid4_y stage5_ifft.sh $args5_y | cut -d " " -f 4)
 
 # Stage 6: Generate dynamic spectra and calculate Stokes parameters
-out5=${logpre}_stage6.out
+out6=${logpre}_stage6.out
 args6="$FRB $DM"
 
-echo "sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobidy5_x,$jobid5_y stage6_dynspecs.sh $args6"
-sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobidy5_x:$jobid5_y stage6_dynspecs.sh $args6
+echo "sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobid5_x:$jobid5_y stage6_dynspecs.sh $args6"
+sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobid5_x:$jobid5_y stage6_dynspecs.sh $args6
