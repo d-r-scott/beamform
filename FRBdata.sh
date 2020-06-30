@@ -169,8 +169,10 @@ elif [ "$FRB" == "200430" ]; then
 	offset=256000
 	DM=381.045
 	f0=864.5
-	calcfile="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/craftfrb_139162.im"
-	fcm="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/fcm.txt"
+	#calcfile="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/craftfrb_139162.im"
+	calcfile="/fred/oz002/askap/craft/frb200430/frb/data.1ms.dmshift2/c1_f0/craftfrb_204531.im"
+	#fcm="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/fcm.txt"
+	fcm="/fred/oz002/askap/craft/frb200430/frb/data.1ms.dmshift2/c1_f0/fcm.txt"
 	hwfile=
 	mir=
 	aips="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/bandpasses_noxpol_FRB200430.bp.txt"
