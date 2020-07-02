@@ -38,6 +38,7 @@ if [ "$FRB" == "180924" ]; then
 
 	i=1
 	n=16384
+	n_ant=24
 
 elif [ "$FRB" == "181112" ]; then
 	offset=2106003
@@ -60,6 +61,7 @@ elif [ "$FRB" == "181112" ]; then
 
 	i=1
 	n=16384
+	n_ant=12
 
 elif [ "$FRB" == "190102" ]; then
 	offset=1880759
@@ -80,6 +82,7 @@ elif [ "$FRB" == "190102" ]; then
 
   i=1
   n=16384
+  n_ant=23
 
 elif [ "$FRB" == "190608" ]; then
 	offset=2018819
@@ -101,6 +104,7 @@ elif [ "$FRB" == "190608" ]; then
 
 	i=1
 	n=16384
+	n_ant=21
 
 elif [ "$FRB" == "190611" ]; then
 	offset=2018819
@@ -122,6 +126,7 @@ elif [ "$FRB" == "190611" ]; then
 
 	i=1
 	n=16384
+	n_ant=25
 
 elif [ "$FRB" == "190711" ]; then
 	offset=302100
@@ -143,6 +148,7 @@ elif [ "$FRB" == "190711" ]; then
 
 	i=1
 	n=16384
+	n_ant=28
 
 elif [ "$FRB" == "190714" ]; then
 	offset=1887164
@@ -165,6 +171,7 @@ elif [ "$FRB" == "190714" ]; then
 
 	i=1
 	n=16384
+	n_ant=25
 
 elif [ "$FRB" == "191228" ]; then
 	offset=1576224
@@ -186,6 +193,7 @@ elif [ "$FRB" == "191228" ]; then
 
   i=1
   n=16384
+  n_ant=21
 
 elif [ "$FRB" == "200430" ]; then
 	offset=256000
@@ -209,6 +217,7 @@ elif [ "$FRB" == "200430" ]; then
 
 	i=1
 	n=40960
+	n_ant=26
 
 else
 	echo "ERROR: FRB not recognised!"

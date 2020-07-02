@@ -4,7 +4,6 @@
 FRB=$1      # FRB name
 a_or_m=$2   # AIPS or MIRIAD solutions for correlation
 pol=$3      # Polarisation (x or y)
-n_ant=$4    # Number of antennae there is for this FRB
 
 # KEY DIFFERENCE BETWEEN THIS VERSION AND HYERIN'S ORIGINAL VERSION:
 # Antenna number is not specified, all antennas are always processed
@@ -38,6 +37,7 @@ echo "mir=	$mir"
 echo "f_vcraft=	$f_vcraft"
 echo "i=  $i"
 echo "n=  $n"
+echo "n_ant=  $n_ant"
 
 # Stage 1: Per-antenna correlation
 out1=${logpre}_stage1.out
@@ -81,4 +81,6 @@ out3=${logpre}_stage3.out
 args3="$FRB $pol $fftlen"   # fftlen was exported by stage1_correlation.sh
 
 echo "sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3"
-sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3
+jobid3=$(sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3 | cut -d " " -f 4)
+
+# We set jobid3 above so that it can be used by all_stages.sh to chain stages 1, 2, 3 with 4, 5, 6
