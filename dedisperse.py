@@ -37,7 +37,7 @@ def dedisperse(f, DM, f0, bw):
 	print('Dedispersing')
 
 	n_sam = len(f)
-	k_DM = 4148.808
+	k_DM = 2.41e-4
 
 	f_min = f0 - float(bw)/2
 	f_max = f0 + float(bw)/2
@@ -45,7 +45,7 @@ def dedisperse(f, DM, f0, bw):
 	# TODO: figure out why Hyerin put f_max and f_min in this order
 	freqs = np.linspace(f_max, f_min, n_sam)
 
-	dedisp_phases = np.exp(2j*np.pi*DM*k_DM*((freqs-f0)**2/f0**2/freqs*1e6))
+	dedisp_phases = np.exp(2j*np.pi*DM/k_DM*((freqs-f0)**2/f0**2/freqs*1e6))
 
 	f *= dedisp_phases
 
