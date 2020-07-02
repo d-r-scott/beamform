@@ -24,7 +24,7 @@ args4_y="$FRB y $DM $f0"
 
 # Check if we are provided with jobid3_x and jobid4_x, and if so, set them as dependencies for stage4.
 # If they're not provided, stage4 has no dependencies
-if [ "$jobid3_x" != "" && "$jobid3_y" != "" ]; then
+if [ "$jobid3_x" != "" ] && [ "$jobid3_y" != "" ]; then
   dependency4_x="--dependency=afterok:$jobid3_x"
   dependency4_y="--dependency=afterok:$jobid3_y"
 else
