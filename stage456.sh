@@ -2,6 +2,10 @@
 
 # Command line arguments
 FRB=$1
+# Following two are optional, only used when all_stages.sh is run.
+# They are used to allow all stages to be submitted at once.
+jobid3_x=$2
+jobid3_y=$3
 
 # NOTE: BOTH POLARISATIONS (X AND Y) WILL BE PROCESSED
 
@@ -18,11 +22,21 @@ out4=${logpre}_stage4.out
 args4_x="$FRB x $DM $f0"
 args4_y="$FRB y $DM $f0"
 
+# Check if we are provided with jobid3_x and jobid4_x, and if so, set them as dependencies for stage4.
+# If they're not provided, stage4 has no dependencies
+if [ "$jobid3_x" != "" && "$jobid3_y" != "" ]; then
+  dependency4_x="--dependency=afterok:$jobid3_x"
+  dependency4_y="--dependency=afterok:$jobid3_y"
+else
+  dependency4_x=""
+  dependency4_y=""
+fi
+
 echo "sbatch --output=$out4 --error=$out4 stage4_dedispersion.sh $args4_x"
-jobid4_x=$(sbatch --output=$out4 --error=$out4 stage4_dedispersion.sh $args4_x | cut -d " " -f 4)
+jobid4_x=$(sbatch --output=$out4 --error=$out4 $dependency4_x stage4_dedispersion.sh $args4_x | cut -d " " -f 4)
 
 echo "sbatch --output=$out4 --error=$out4 stage4_dedispersion.sh $args4_y"
-jobid4_y=$(sbatch --output=$out4 --error=$out4 stage4_dedispersion.sh $args4_y | cut -d " " -f 4)
+jobid4_y=$(sbatch --output=$out4 --error=$out4 $dependency4_y stage4_dedispersion.sh $args4_y | cut -d " " -f 4)
 
 # Stage 5: IFFT
 out5=${logpre}_stage5.out
