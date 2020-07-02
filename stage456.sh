@@ -32,10 +32,10 @@ else
   dependency4_y=""
 fi
 
-echo "sbatch --output=$out4 --error=$out4 stage4_dedispersion.sh $args4_x"
+echo "sbatch --output=$out4 --error=$out4 $dependency4_x stage4_dedispersion.sh $args4_x"
 jobid4_x=$(sbatch --output=$out4 --error=$out4 $dependency4_x stage4_dedispersion.sh $args4_x | cut -d " " -f 4)
 
-echo "sbatch --output=$out4 --error=$out4 stage4_dedispersion.sh $args4_y"
+echo "sbatch --output=$out4 --error=$out4 $dependency4_y stage4_dedispersion.sh $args4_y"
 jobid4_y=$(sbatch --output=$out4 --error=$out4 $dependency4_y stage4_dedispersion.sh $args4_y | cut -d " " -f 4)
 
 # Stage 5: IFFT
