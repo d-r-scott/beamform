@@ -36,6 +36,9 @@ if [ "$FRB" == "180924" ]; then
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
 
+	i=1
+	n=16384
+
 elif [ "$FRB" == "181112" ]; then
 	offset=2106003
 	DM=589.265
@@ -55,6 +58,9 @@ elif [ "$FRB" == "181112" ]; then
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
 
+	i=1
+	n=16384
+
 elif [ "$FRB" == "190102" ]; then
 	offset=1880759
 	DM=364.544
@@ -72,6 +78,8 @@ elif [ "$FRB" == "190102" ]; then
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
 
+  i=1
+  n=16384
 
 elif [ "$FRB" == "190608" ]; then
 	offset=2018819
@@ -91,6 +99,9 @@ elif [ "$FRB" == "190608" ]; then
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
 
+	i=1
+	n=16384
+
 elif [ "$FRB" == "190611" ]; then
 	offset=2018819
 	DM=338.8
@@ -109,6 +120,9 @@ elif [ "$FRB" == "190611" ]; then
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
 
+	i=1
+	n=16384
+
 elif [ "$FRB" == "190711" ]; then
 	offset=302100
 	DM=587.5
@@ -126,6 +140,9 @@ elif [ "$FRB" == "190711" ]; then
 	else
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
+
+	i=1
+	n=16384
 
 elif [ "$FRB" == "190714" ]; then
 	offset=1887164
@@ -146,6 +163,9 @@ elif [ "$FRB" == "190714" ]; then
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
 
+	i=1
+	n=16384
+
 elif [ "$FRB" == "191228" ]; then
 	offset=1576224
 	DM=296.5
@@ -164,6 +184,8 @@ elif [ "$FRB" == "191228" ]; then
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
 
+  i=1
+  n=16384
 
 elif [ "$FRB" == "200430" ]; then
 	offset=256000
@@ -184,6 +206,9 @@ elif [ "$FRB" == "200430" ]; then
 	else
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
+
+	i=1
+	n=40960
 
 else
 	echo "ERROR: FRB not recognised!"

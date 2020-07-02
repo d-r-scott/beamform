@@ -36,6 +36,8 @@ echo "hwfile=	$hwfile"
 echo "aips=		$aips"
 echo "mir=	$mir"
 echo "f_vcraft=	$f_vcraft"
+echo "i=  $i"
+echo "n=  $n"
 
 # Stage 1: Per-antenna correlation
 out1=${logpre}_stage1.out
@@ -53,8 +55,6 @@ fi
 # We'll add hwfile in inside stage1_correlation.sh
 
 # Processing parameters
-i=1
-n=40960		# $n * 54 * 336 is the total length of the output array. Try to make n % 32 == 0
 fftlen=$(( $n * 64 ))
 
 args1="$args1 $i $n"
