@@ -31,9 +31,9 @@ def get_args():
 	parser.add_argument('-x', help='Dedispersed 3ns x time series')
 	parser.add_argument('-y', help='Dedispersed 3ns y time series')
 	parser.add_argument('-i', help='Dedispersed 3ns i time series')
-	parser.add_argument('--DM_min', help='Minimum Delta DM')
-	parser.add_argument('--DM_max', help='Maximum Delta DM')
-	parser.add_argument('--DM_res', help='DM resolution')
+	parser.add_argument('--DM_min', help='Minimum Delta DM', type=float)
+	parser.add_argument('--DM_max', help='Maximum Delta DM', type=float)
+	parser.add_argument('--DM_res', help='DM resolution', type=float)
 	return parser.parse_args()
 
 
