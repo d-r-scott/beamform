@@ -81,6 +81,8 @@ def create_H_array(n_sam, f0, bw, Delta_DMs, Delta_DM_min, Delta_DM_max, DM_res)
 	H_array = np.zeros((Delta_DMs.shape[0], n_sam), dtype=np.complex64)
 
 	for i, DM in enumerate(Delta_DMs):
+		if i % 100 == 0:
+			print(DM)
 		H_array[i, :] = np.exp(2j*np.pi*DM/k_DM*((freqs-f0)**2/f0**2/freqs*1e6))
 
 	H_array_fname = f'H_{f0}_{n_sam}_{Delta_DM_min}-{Delta_DM_max}-{DM_res}.npy'
