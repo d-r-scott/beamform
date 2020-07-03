@@ -37,6 +37,13 @@ def dedisperse(f, DM, f0, bw):
 	print('Dedispersing')
 
 	n_sam = len(f)
+
+	"""
+	This value of k_DM is not the most precise available. It is used because to alter the commonly-used
+	value would make pulsar timing very difficult. Also, to quote Hobbs, Edwards, and Manchester 2006:
+		...ions and magnetic fields introduce a rather uncertain correction of the order of a part in
+		10^5 (Spitzer 1962), comparable to the uncertainty in some measured DM values...
+	"""
 	k_DM = 2.41e-4
 
 	f_min = f0 - float(bw)/2
