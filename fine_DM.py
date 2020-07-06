@@ -15,13 +15,10 @@ def _main():
 	y_3ns_t = load(args.y)
 	i_3ns_t = load(args.i)
 
-	x_3ns_t_crop, y_3ns_t_crop, t_res_us = crop(x_3ns_t, y_3ns_t, i_3ns_t)
-
+	x_3ns_t_crop, y_3ns_t_crop, t_res_us = crop(x_3ns_t, y_3ns_t, args.t_res, args.t_min, args.t_max)
 	Delta_DMs = np.arange(args.DM_min, args.DM_max, args.DM_res)
-
-	H_array_fname = create_H_array(x_3ns_t_crop.shape[0], 1297.5, 336, Delta_DMs, args.DM_min, args.DM_max, args.DM_res)
-
-	dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us)
+	H_array_fname = create_H_array(x_3ns_t_crop.shape[0], args.f, args.b, Delta_DMs, args.DM_min, args.DM_max, args.DM_res)
+	dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us, args.w)
 
 	os.remove(H_array_fname)
 
@@ -35,6 +32,12 @@ def get_args():
 	parser.add_argument('--DM_min', help='Minimum Delta DM', type=float)
 	parser.add_argument('--DM_max', help='Maximum Delta DM', type=float)
 	parser.add_argument('--DM_res', help='DM resolution', type=float)
+	parser.add_argument('--t_min', help='Minimum time to crop to (s)', type=float)
+	parser.add_argument('--t_max', help='Maximum time to crop to (s)', type=float)
+	parser.add_argument('--t_res', help='Time resolution to use when calculating S/N (us)', type=float)
+	parser.add_argument('-w', help='Burst width to use when calculating S/N (us)', type=float)
+	parser.add_arguments('-b', help='Bandwidth (MHz)', type=int, default=336)
+	parser.add_arguments('-f', help='Central frequency (MHz)', type=float)
 	return parser.parse_args()
 
 
@@ -42,36 +45,19 @@ def load(fname):
 	return np.load(fname, mmap_mode='r')
 
 
-def crop(x_3ns_t, y_3ns_t, i_3ns_t):
+def crop(x_3ns_t, y_3ns_t, t_res_us, t_min, t_max):
 	assert len(x_3ns_t) == len(y_3ns_t)
 
-	while True:
-		t_res_us = int(input("Time resolution to plot with in us: "))
+	# Original time resolution is (336 MHz)^-1, which is exactly 1/336 of 1 us
+	reduction_factor = 336 * t_res_us
 
-		# Original time resolution is (336 MHz)^-1, which is exactly 1/336 of 1 us
-		reduction_factor = 336 * t_res_us
+	t_3ns = (np.arange(0, len(x_3ns_t)) / (336*u.MHz)).to(u.s)
 
-		'''
-		i_red_t = reduce(i_3ns_t, 336*t_res_us)
+	t_mask = (t_3ns.value >= t_min) & (t_3ns.value < t_max)
+	x_3ns_t_crop = x_3ns_t[t_mask]
+	y_3ns_t_crop = y_3ns_t[t_mask]
 
-		t_red = (np.arange(0, len(i_red_t)) * (t_res_us * u.us)).to(u.s)
-
-		plt.plot(t_red, i_red_t)
-		plt.show()
-		'''
-
-		in_str = input("Input t_min, t_max (both in s) or X for new time resolution: ")
-
-		if in_str != "X":
-			t_min, t_max = map(float, in_str.split(", "))
-
-			t_3ns = (np.arange(0, len(x_3ns_t)) / (336*u.MHz)).to(u.s)
-
-			t_mask = (t_3ns.value >= t_min) & (t_3ns.value < t_max)
-			x_3ns_t_crop = x_3ns_t[t_mask]
-			y_3ns_t_crop = y_3ns_t[t_mask]
-
-			return x_3ns_t_crop, y_3ns_t_crop, t_res_us
+	return x_3ns_t_crop, y_3ns_t_crop, t_res_us
 
 
 def create_H_array(n_sam, f0, bw, Delta_DMs, Delta_DM_min, Delta_DM_max, DM_res):
@@ -96,7 +82,7 @@ def create_H_array(n_sam, f0, bw, Delta_DMs, Delta_DM_min, Delta_DM_max, DM_res)
 	return H_array_fname
 
 
-def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us):
+def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us, w_us):
 	H_array = np.load(H_array_fname, mmap_mode='r')
 
 	x_3ns_f_crop = fft(x_3ns_t_crop)
@@ -113,7 +99,7 @@ def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_
 		reduction_factor = 336*t_res_us
 		i_red_t_dd = reduce(i_3ns_t_dd, reduction_factor)
 		i_norm = normalise(i_red_t_dd)
-		peak_sns[i] = calc_peak_sn(i_norm, reduction_factor)
+		peak_sns[i] = calc_peak_sn(i_norm, reduction_factor, w_us)
 
 	plt.plot(Delta_DMs, peak_sns)
 	plt.xlabel(r'$\Delta$ DM')
@@ -122,7 +108,7 @@ def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_
 	np.save('SN_DM.npy', peak_sns)
 
 
-def calc_peak_sn(t_ser, reduction_factor, w_us=15.8):	
+def calc_peak_sn(t_ser, reduction_factor, w_us):
 	w_sam = ceil((w_us*336)/reduction_factor)
 	sns = np.zeros((len(t_ser) - w_sam))
 	for i in range(len(t_ser) - w_sam):
