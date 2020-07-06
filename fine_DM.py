@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import astropy.units as u
 from scipy.fft import fft, ifft
+from math import ceil
 
 
 def _main():
@@ -50,12 +51,14 @@ def crop(x_3ns_t, y_3ns_t, i_3ns_t):
 		# Original time resolution is (336 MHz)^-1, which is exactly 1/336 of 1 us
 		reduction_factor = 336 * t_res_us
 
+		'''
 		i_red_t = reduce(i_3ns_t, 336*t_res_us)
 
 		t_red = (np.arange(0, len(i_red_t)) * (t_res_us * u.us)).to(u.s)
 
 		plt.plot(t_red, i_red_t)
 		plt.show()
+		'''
 
 		in_str = input("Input t_min, t_max (both in s) or X for new time resolution: ")
 
@@ -110,13 +113,22 @@ def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_
 		reduction_factor = 336*t_res_us
 		i_red_t_dd = reduce(i_3ns_t_dd, reduction_factor)
 		i_norm = normalise(i_red_t_dd)
-		peak_sns[i] = np.max(i_norm)
+		peak_sns[i] = calc_peak_sn(i_norm, reduction_factor)
 
 	plt.plot(Delta_DMs, peak_sns)
 	plt.xlabel(r'$\Delta$ DM')
 	plt.ylabel('S/N')
 	plt.show()
 	np.save('SN_DM.npy', peak_sns)
+
+
+def calc_peak_sn(t_ser, reduction_factor, w_us=15.8):	
+	w_sam = ceil((w_us*336)/reduction_factor)
+	sns = np.zeros((len(t_ser) - w_sam))
+	for i in range(len(t_ser) - w_sam):
+		sns[i] = np.sum(t_ser[i:i+w_sam])/np.sqrt(w_sam)
+
+	return np.max(sns)
 
 
 def dedisperse_ifft(f, H):
