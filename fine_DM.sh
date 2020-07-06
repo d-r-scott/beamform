@@ -18,9 +18,10 @@ t_res=$8    # Time resolution to use when calculating S/N (us)
 w=$9        # Burst width to use when calculating S/N (us)
 b=${10}     # Bandwidth (MHz)
 f=${11}     # Central frequency (MHz)
+o=${12}
 
 module load gcc/7.3.0 openmpi/3.0.0 python/3.7.4 numpy/1.18.2-python-3.7.4 scipy/1.4.1-python-3.7.4 matplotlib/3.2.1-python-3.7.4 astropy/4.0.1-python-3.7.4
 
-echo "python3 fine_DM.py -x $x -y $y --DM_min $DM_min --DM_max $DM_max --DM_res $DM_res --t_min $t_min --t_max $t_max --t_res $t_res -w $w -b $b -f $f"
-python3 fine_DM.py -x $x -y $y --DM_min $DM_min --DM_max $DM_max --DM_res $DM_res --t_min $t_min --t_max $t_max --t_res $t_res -w $w -b $b -f $f
+echo "python3 fine_DM.py -x $x -y $y --DM_min $DM_min --DM_max $DM_max --DM_res $DM_res --t_min $t_min --t_max $t_max --t_res $t_res -w $w -b $b -f $f -o $o"
+python3 fine_DM.py -x $x -y $y --DM_min $DM_min --DM_max $DM_max --DM_res $DM_res --t_min $t_min --t_max $t_max --t_res $t_res -w $w -b $b -f $f -o $o
 

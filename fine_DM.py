@@ -17,7 +17,7 @@ def _main():
 	x_3ns_t_crop, y_3ns_t_crop, t_res_us = crop(x_3ns_t, y_3ns_t, args.t_res, args.t_min, args.t_max)
 	Delta_DMs = np.arange(args.DM_min, args.DM_max, args.DM_res)
 	H_array_fname = create_H_array(x_3ns_t_crop.shape[0], args.f, args.b, Delta_DMs, args.DM_min, args.DM_max, args.DM_res)
-	dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us, args.w)
+	dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us, args.w, args.o)
 
 	os.remove(H_array_fname)
 
@@ -36,6 +36,7 @@ def get_args():
 	parser.add_argument('-w', help='Burst width to use when calculating S/N (us)', type=float)
 	parser.add_argument('-b', help='Bandwidth (MHz)', type=int, default=336)
 	parser.add_argument('-f', help='Central frequency (MHz)', type=float)
+	parser.add_argument('-o', help='Output filename for SN vs DM')
 	return parser.parse_args()
 
 
@@ -80,7 +81,7 @@ def create_H_array(n_sam, f0, bw, Delta_DMs, Delta_DM_min, Delta_DM_max, DM_res)
 	return H_array_fname
 
 
-def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us, w_us):
+def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_us, w_us, outfile):
 	H_array = np.load(H_array_fname, mmap_mode='r')
 
 	x_3ns_f_crop = fft(x_3ns_t_crop)
@@ -103,7 +104,7 @@ def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_
 	plt.xlabel(r'$\Delta$ DM')
 	plt.ylabel('S/N')
 	plt.show()
-	np.save('SN_DM.npy', peak_sns)
+	np.save(outfile, peak_sns)
 
 
 def calc_peak_sn(t_ser, reduction_factor, w_us):
