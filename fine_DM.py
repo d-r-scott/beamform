@@ -13,7 +13,6 @@ def _main():
 
 	x_3ns_t = load(args.x)
 	y_3ns_t = load(args.y)
-	i_3ns_t = load(args.i)
 
 	x_3ns_t_crop, y_3ns_t_crop, t_res_us = crop(x_3ns_t, y_3ns_t, args.t_res, args.t_min, args.t_max)
 	Delta_DMs = np.arange(args.DM_min, args.DM_max, args.DM_res)
@@ -28,7 +27,6 @@ def get_args():
 	parser = ArgumentParser(description='Calculates S/N(DM) for a given FRB', formatter_class=ArgumentDefaultsHelpFormatter)
 	parser.add_argument('-x', help='Dedispersed 3ns x time series')
 	parser.add_argument('-y', help='Dedispersed 3ns y time series')
-	parser.add_argument('-i', help='Dedispersed 3ns i time series')
 	parser.add_argument('--DM_min', help='Minimum Delta DM', type=float)
 	parser.add_argument('--DM_max', help='Maximum Delta DM', type=float)
 	parser.add_argument('--DM_res', help='DM resolution', type=float)
