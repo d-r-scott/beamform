@@ -34,8 +34,8 @@ def get_args():
 	parser.add_argument('--t_max', help='Maximum time to crop to (s)', type=float)
 	parser.add_argument('--t_res', help='Time resolution to use when calculating S/N (us)', type=float)
 	parser.add_argument('-w', help='Burst width to use when calculating S/N (us)', type=float)
-	parser.add_arguments('-b', help='Bandwidth (MHz)', type=int, default=336)
-	parser.add_arguments('-f', help='Central frequency (MHz)', type=float)
+	parser.add_argument('-b', help='Bandwidth (MHz)', type=int, default=336)
+	parser.add_argument('-f', help='Central frequency (MHz)', type=float)
 	return parser.parse_args()
 
 
