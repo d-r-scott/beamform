@@ -359,7 +359,7 @@ class VcraftMux(object):
         if nsamp is None:
             nsamp = self.nsamps
 
-        assert samp_start + nsamp <= self.nsamps, 'Invalid read request. nsamps={} samp_start ={} differnce{}'.format(nsamps, samp_start, nsamp-samp_start)
+        assert samp_start + nsamp <= self.nsamps, 'Invalid read request. nsamps={} samp_start ={} differnce{}'.format(self.nsamps, samp_start, self.nsamps-samp_start)
 
         # allocate giant buffer
         d = np.zeros((nsamp, len(self.freqs)), dtype=np.complex64)
