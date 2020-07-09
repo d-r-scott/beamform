@@ -196,7 +196,7 @@ elif [ "$FRB" == "191228" ]; then
   n_ant=21
 
 elif [ "$FRB" == "200430" ]; then
-	offset=6000
+	offset=196096
 	DM=381.045
 	f0=864.5
 	#calcfile="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/craftfrb_139162.im"
@@ -216,7 +216,7 @@ elif [ "$FRB" == "200430" ]; then
 	fi
 
 	i=1
-	n=51200
+	n=55168
 	n_ant=26
 
 else
