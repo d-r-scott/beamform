@@ -95,7 +95,7 @@ def dedisperse_many(x_3ns_t_crop, y_3ns_t_crop, H_array_fname, Delta_DMs, t_res_
 
 		i_3ns_t_dd = np.abs(x_3ns_t_dd)**2 + np.abs(y_3ns_t_dd)**2
 
-		reduction_factor = 336*t_res_us
+		reduction_factor = ceil(336*t_res_us)
 		i_red_t_dd = reduce(i_3ns_t_dd, reduction_factor)
 		i_norm = normalise(i_red_t_dd)
 		peak_sns[i] = calc_peak_sn(i_norm, reduction_factor, w_us)
