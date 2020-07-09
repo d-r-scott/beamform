@@ -40,7 +40,6 @@ echo "n=  $n"
 echo "n_ant=  $n_ant"
 
 # Stage 1: Per-antenna correlation
-out1=${logpre}_stage1.out
 
 args1="$FRB $a_or_m $pol $offset $calcfile $fcm"
 if [ "$a_or_m" == "AIPS" ]; then
@@ -63,6 +62,7 @@ max_ant=$(( n_ant - 1 ))
 jobid1=""
 # TODO: Need to put this in a for loop for all antennae
 for ant in `seq 0 $max_ant`; do
+  out1=${logpre}_stage1_${ant}.out
   echo "$args1"
   echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 $f_vcraft $ant $hwfile"
   new_jobid=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 "$f_vcraft" $ant $hwfile | cut -d " " -f 4)
