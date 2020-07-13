@@ -715,6 +715,7 @@ class MiriadGainSolutions(object):
                                 fring_f = drcal+'/'+line.split()[0]
                             if "selfcal" in line and ".sn.txt" in line:
                                 sc_f = drcal+'/'+line.split()[0]
+                                print('FOUND SELFCAL FILE: {}'.format(sc_f))
                 else:
                     print('No or multiple readme file exists for AIPS')
                     fring_f = bp_c_root.replace(bp_c_root.split('/')[-1],"delays.sn.txt")#("bandpasses.bp.txt","delays.sn.txt")
