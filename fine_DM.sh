@@ -3,7 +3,7 @@
 #SBATCH --job-name=fine_DM
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=0:30:00
+#SBATCH --time=4:30:00
 #SBATCH --mem=128g
 
 # Command line arguments
