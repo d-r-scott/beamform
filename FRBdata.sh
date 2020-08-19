@@ -57,7 +57,7 @@ elif [ "$FRB" == "181112" ]; then
 		f_vcraft="${basedr2}python/voltages/FRB181112/ak**/beam01/*.vcraft"
 	else
 		echo "ERROR: Must provide polarisation as x or y!"
-	fi
+	drfi
 
 	i=1
 	n=16384
@@ -117,9 +117,11 @@ elif [ "$FRB" == "190611" ]; then
 	aips="${basedr}Calibration/aipscal/frb${FRB}/noxpol/200225/bandpasses.bp.txt" # AIPS gain, bandpass
 
 	if [ "$pol" == "x" ]; then
-		f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam36/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+		#f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam36/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+		f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam26/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
 	elif [ "$pol" == "y" ]; then
-		f_vcraft=$(find ${basedr2}python/voltages/FRB${FRB}/ak**/beam37/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+		#f_vcraft=$(find ${basedr2}python/voltages/frb${frb}/ak**/beam37/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
+		f_vcraft=$(find ${basedr2}python/voltages/frb${frb}/ak**/beam27/*.vcraft -not -name "*ak13*" -not -name "*ak19*" -not -name "*ak20*" -not -name "*ak28*" )
 	else
 		echo "ERROR: Must provide polarisation as x or y!"
 	fi
