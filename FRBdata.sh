@@ -57,7 +57,7 @@ elif [ "$FRB" == "181112" ]; then
 		f_vcraft="${basedr2}python/voltages/FRB181112/ak**/beam01/*.vcraft"
 	else
 		echo "ERROR: Must provide polarisation as x or y!"
-	drfi
+	fi
 
 	i=1
 	n=16384
