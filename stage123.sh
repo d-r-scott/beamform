@@ -2,7 +2,7 @@
 
 # Command line arguments
 FRB=$1      # FRB name
-a_or_m=$2   # AIPS or MIRIAD solutions for correlation
+a_or_m=$2   # AIPS or MIRIAD solutions for beamforming
 pol=$3      # Polarisation (x or y)
 
 # KEY DIFFERENCE BETWEEN THIS VERSION AND HYERIN'S ORIGINAL VERSION:
@@ -39,7 +39,7 @@ echo "i=  $i"
 echo "n=  $n"
 echo "n_ant=  $n_ant"
 
-# Stage 1: Per-antenna correlation
+# Stage 1: Per-antenna beamforming
 
 args1="$FRB $a_or_m $pol $offset $calcfile $fcm"
 if [ "$a_or_m" == "AIPS" ]; then
@@ -51,7 +51,7 @@ else
   echo "Exiting..."
   exit
 fi
-# We'll add hwfile in inside stage1_correlation.sh
+# We'll add hwfile in inside stage1_beamforming.sh
 
 # Processing parameters
 fftlen=$(( $n * 64 ))
@@ -64,8 +64,8 @@ jobid1=""
 for ant in `seq 0 $max_ant`; do
   out1=${logpre}_stage1_${ant}.out
   echo "$args1"
-  echo "sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 $f_vcraft $ant $hwfile"
-  new_jobid=$(sbatch --output=$out1 --error=$out1 stage1_correlation.sh $args1 "$f_vcraft" $ant $hwfile | cut -d " " -f 4)
+  echo "sbatch --output=$out1 --error=$out1 stage1_beamforming.sh $args1 $f_vcraft $ant $hwfile"
+  new_jobid=$(sbatch --output=$out1 --error=$out1 stage1_beamforming.sh $args1 "$f_vcraft" $ant $hwfile | cut -d " " -f 4)
   jobid1="$jobid1:$new_jobid"
 done
 
@@ -78,7 +78,7 @@ jobid2=$(sbatch --output=$out2 --error=$out2 --dependency=afterok$jobid1 stage2_
 
 # Stage 3: Derippling
 out3=${logpre}_stage3.out
-args3="$FRB $pol $fftlen"   # fftlen was exported by stage1_correlation.sh
+args3="$FRB $pol $fftlen"   # fftlen was exported by stage1_beamforming.sh
 
 echo "sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3"
 jobid3=$(sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3 | cut -d " " -f 4)
