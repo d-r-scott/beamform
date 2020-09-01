@@ -1,9 +1,9 @@
 #!/bin/bash --login
 
-#SBATCH --job-name=correlation
+#SBATCH --job-name=beamforming
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=0:30:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=32g
 
 # Command line arguments
