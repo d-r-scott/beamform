@@ -39,7 +39,7 @@ def deripple(FFFF, fftLength = 1048576, bw=336):
 	:return: Derippled fine spectrum
 	"""
 	print('derippling....')
-	FFFF= FFFF[0,:,0]
+	FFFF = FFFF[0,:,0]
 
 	# ASKAP Parameters
 	N = 1536

@@ -62,11 +62,11 @@ class VcraftFile(object):
     def __init__(self, fname, mode=None):
         self.fname = fname
         f = fname
-        hdr = DadaHeader.fromfile(f+'.hdr')
+        hdr = DadaHeader.fromfile(f+'.hdr')     # hdr is a dictionary of the header contents
         self.hdr = hdr
         self.fin = open(f, 'r')
         self.hdrsize = int(hdr['HDR_SIZE'][0])
-        self.fin.seek(self.hdrsize)
+        self.fin.seek(self.hdrsize)             # Set the file's position to after the header
         if mode is None:
             self.mode = int(hdr['CRAFT_MODE'][0]) & 0x3
         else:
@@ -265,6 +265,8 @@ class VcraftMux(object):
     frequency axis
     '''
 
+    # Multiplex: a system or signal involving simultaneous transmission of several messages along a single channel of communication
+
     def __init__(self, vcraft_files, delays=None):
         '''
         :vcraft_files: A list of open Vcraft files
@@ -388,8 +390,11 @@ def mux_by_pol(filenames, delays=None):
 def mux_by_antenna(filenames, delays=None):
     all_files = [VcraftFile(f) for f in filenames]
     all_files.sort(key=lambda f:f.hdr['ANT'][0])
-    ants = [f.hdr['ANT'][0] for f in all_files]
-    mux_by_ant = itertools.groupby(all_files, lambda f:f.hdr['ANT'][0])
+
+    #ants = [f.hdr['ANT'][0] for f in all_files]     # Redundant line
+
+    mux_by_ant = itertools.groupby(all_files, lambda f:f.hdr['ANT'][0]) # An iterable of tuples (antname, files) grouped by antenna name
+
     muxes = [VcraftMux(list(files), delays) for antname, files in mux_by_ant]
     muxes.sort(key=lambda mux: mux.antno) # sort by antenna number
     

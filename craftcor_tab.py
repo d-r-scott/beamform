@@ -246,9 +246,11 @@ class AntennaSource(object):
         print('FRAMEID: '+str(frameid)+', remainder from 32: '+str(frameid % 32))
         # To avoid iPFB fractional delay, set FRAMEID such that the remainder is 0
         #print(sampoff, nsamp)
-        rawd = self.vfile.read(sampoff, nsamp)
+        rawd = self.vfile.read(sampoff, nsamp)  # TODO HERE'S THE DATA
 
         assert rawd.shape == (nsamp, corr.ncoarse_chan), 'Unexpected shape from vfile: {} expected ({},{})'.format(rawd.shape, nsamp, corr.ncoarse_chan)
+
+        # TODO save raw data here, plot as dynspec at 1 ms
 
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
         d1 = data_out
@@ -262,7 +264,7 @@ class AntennaSource(object):
                 freqs = -freqs
 
             x1 = rawd[:, c].reshape(-1, corr.nfft)
-            xf1 = np.fft.fft(x1, axis=1)
+            xf1 = np.fft.fft(x1, axis=1)  # Create dynamic spectrum within the coarse channel
             xf1 = np.fft.fftshift(xf1, axes=1)
             xfguard = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
             delta_t = -fixed_delay_us + geom_delay_us
@@ -282,7 +284,7 @@ class AntennaSource(object):
             if mir_cor[0] == 0: # if correction is 0, flag data
                 phasor *= 0
             else:
-                phasor /= mir_cor
+                phasor /= mir_cor  # TODO investigate mir_cor - antenna correction?
             '''
             pylab.figure(10)
             pylab.plot(np.angle(phasor[0, :]))
@@ -431,6 +433,8 @@ class Correlator(object):
         fr1 = FringeRotParams(self, ant)
         fr2 = FringeRotParams(self, self.refant)
 
+        # fr1: reference antenna
+        # Account for effects of Earth's rotation
         delay = fr1.delay - fr2.delay
         delayrate = fr1.delay_rate - fr2.delay_rate
 
@@ -452,7 +456,7 @@ class Correlator(object):
 
     def get_calc_results(self, mjd):
         #res = self.calcresults.scans[0].eval_src0_poly_delta(mjd, self.refant.antname.lower())
-        res = self.calcresults.scans[0].eval_src0_poly(mjd)
+        res = self.calcresults.scans[0].eval_src0_poly(mjd)  # Calcresults is a ResultsFile
 
         return res
 
