@@ -254,7 +254,7 @@ class AntennaSource(object):
         rawd_fname = 'output/200430/f/raw_{}.npy'.format(self.antno)
         np.save(rawd_fname, rawd)
 
-        exit
+        exit()
 
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
         d1 = data_out
