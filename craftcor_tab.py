@@ -309,15 +309,21 @@ class AntennaSource(object):
         data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
         np.save(data_out_fname, data_out)
 
+		del data_out, rawd
+
         phasors = np.array(phasors)
         phasors_fname = 'output/200430/f/phasors_{0:02d}.npy'.format(self.antno)
         np.save(phasors_fname, phasors)
+
+		del phasors
 
         phasors_mir = np.array(phasors_mir)
         phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
         np.save(phasors_mir_fname, phasors_mir)
 
-		exit()
+		del phasors_mir
+
+        exit()
 
 
         return data_out
