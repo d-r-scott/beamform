@@ -254,8 +254,6 @@ class AntennaSource(object):
         rawd_fname = 'output/200430/f/raw_{}.npy'.format(self.antno)
         np.save(rawd_fname, rawd)
 
-        exit()
-
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
         d1 = data_out
         nfine = corr.nfft - 2*corr.nguard_chan
@@ -289,6 +287,8 @@ class AntennaSource(object):
                 phasor *= 0
             else:
                 phasor /= mir_cor  # TODO investigate mir_cor - antenna correction?
+
+			# TODO plot all arrays here
             '''
             pylab.figure(10)
             pylab.plot(np.angle(phasor[0, :]))
