@@ -221,6 +221,27 @@ elif [ "$FRB" == "200430" ]; then
 	n=58048
 	n_ant=26
 
+elif [ "$FRB" == "200906" ]; then
+	offset=0
+	DM=577.8
+	f0=864.5
+	calcfile=
+	fcm=
+	hwfile=
+	mir=
+	aips=
+
+	if [ "$pol" == "x" ]; then
+		f_vraft=
+	elif [ "$pol" == "y" ]; then
+		f_vcraft=
+	else
+		echo "ERROR: Must provide polarisation as x or y!"
+	fi
+
+	i=1
+	n=58048
+	n_ant=26
 else
 	echo "ERROR: FRB not recognised!"
 fi
