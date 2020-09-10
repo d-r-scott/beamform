@@ -291,7 +291,7 @@ class AntennaSource(object):
             else:
                 phasor /= mir_cor  # TODO investigate mir_cor - antenna correction?
 
-			# TODO plot all arrays here
+            # TODO plot all arrays here
             '''
             pylab.figure(10)
             pylab.plot(np.angle(phasor[0, :]))
@@ -309,19 +309,19 @@ class AntennaSource(object):
         data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
         np.save(data_out_fname, data_out)
 
-		del data_out, rawd
+        del data_out, rawd
 
         phasors = np.array(phasors)
         phasors_fname = 'output/200430/f/phasors_{0:02d}.npy'.format(self.antno)
         np.save(phasors_fname, phasors)
 
-		del phasors
+        del phasors
 
         phasors_mir = np.array(phasors_mir)
         phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
         np.save(phasors_mir_fname, phasors_mir)
 
-		del phasors_mir
+        del phasors_mir
 
         exit()
 
@@ -594,8 +594,8 @@ class Correlator(object):
 def parse_delays(values):
     delayfile = values.calcfile.replace('.im','.hwdelays')
     if os.path.exists(delayfile)==False:
-	delayfile = values.hwfile
-	#print(delayfile)
+    delayfile = values.hwfile
+    #print(delayfile)
     delays = {}
     if delayfile is not None and os.path.exists(delayfile):
         with open(delayfile, 'rU') as dfile:
@@ -613,7 +613,7 @@ def parse_delays(values):
         logging.info('Loaded %s delays from %s', len(delays), delayfile)
     else:
         logging.info('No delays loaded. %s does not exist', delayfile)
-	
+    
 
     return delays
 
