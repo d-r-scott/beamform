@@ -594,7 +594,7 @@ class Correlator(object):
 def parse_delays(values):
     delayfile = values.calcfile.replace('.im','.hwdelays')
     if os.path.exists(delayfile)==False:
-    delayfile = values.hwfile
+        delayfile = values.hwfile
     #print(delayfile)
     delays = {}
     if delayfile is not None and os.path.exists(delayfile):
