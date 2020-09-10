@@ -251,13 +251,15 @@ class AntennaSource(object):
         assert rawd.shape == (nsamp, corr.ncoarse_chan), 'Unexpected shape from vfile: {} expected ({},{})'.format(rawd.shape, nsamp, corr.ncoarse_chan)
 
         # TODO save raw data here, plot as dynspec at 1 ms
-        rawd_fname = 'output/200430/f/raw_{}.npy'.format(self.antno)
+        rawd_fname = 'output/200430/f/raw_{0:02d}.npy'.format(self.antno)
         np.save(rawd_fname, rawd)
 
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
         d1 = data_out
         nfine = corr.nfft - 2*corr.nguard_chan
 
+        phasors = []
+        phasors_mir = []
 
         for c in xrange(corr.ncoarse_chan):
             cfreq = corr.freqs[c]
@@ -279,6 +281,7 @@ class AntennaSource(object):
             # 1 sample delay ad tryig to get rid of it with a phase ramp, it becaomes
             # blatetly clear what you should do
             phasor = np.exp(np.pi*2j*phases, dtype=np.complex64)
+            phasors.append(phasor)
             freq_ghz = (cfreq+freqs)/1e3
             mir_cor = corr.mir.get_solution(iant,0,freq_ghz)
             #np.array([corr.mir.get_solution(iant, 0, f) for f in freq_ghz])
@@ -294,13 +297,25 @@ class AntennaSource(object):
             pylab.plot(np.angle(phasor[0, :]))
             pylab.plot(np.angle(phasor[-1:, :]))
             '''
-                        
+
+            phasors_mir.append(phasor)
 
             xfguard *= phasor
             # slice out only useful channels
             fcstart = c*nfine
             fcend = (c+1)*nfine
             data_out[:, fcstart:fcend, 0] = xfguard
+
+        data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
+        np.save(data_out_fname, data_out)
+
+        phasors = np.array(phasors)
+        phasors_fname = 'output/200430/f/phasors_{0:02d}.npy'.format(self.antno)
+        np.save(phasors_fname, phasors)
+
+        phasors_mir = np.array(phasors_mir)
+        phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
+        np.save(phasors_mir_fname, phasors_mir)
 
         return data_out
 
