@@ -317,6 +317,9 @@ class AntennaSource(object):
         phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
         np.save(phasors_mir_fname, phasors_mir)
 
+		exit()
+
+
         return data_out
 
             
