@@ -258,8 +258,10 @@ class AntennaSource(object):
         d1 = data_out
         nfine = corr.nfft - 2*corr.nguard_chan
 
-        phasors = []
-        phasors_mir = []
+        phasors_fname = 'output/200430/f/phasors_{0:02d}.npy'.format(self.antno)
+        phasors_f = open(phasors_fname, 'wb')
+        phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
+        phasors_mir_f = open(phasors_mir_fname, 'wb')
 
         for c in xrange(corr.ncoarse_chan):
             cfreq = corr.freqs[c]
@@ -281,7 +283,9 @@ class AntennaSource(object):
             # 1 sample delay ad tryig to get rid of it with a phase ramp, it becaomes
             # blatetly clear what you should do
             phasor = np.exp(np.pi*2j*phases, dtype=np.complex64)
-            phasors.append(phasor)
+
+            np.savetxt(phasors_f, phasor)
+
             freq_ghz = (cfreq+freqs)/1e3
             mir_cor = corr.mir.get_solution(iant,0,freq_ghz)
             #np.array([corr.mir.get_solution(iant, 0, f) for f in freq_ghz])
@@ -298,7 +302,7 @@ class AntennaSource(object):
             pylab.plot(np.angle(phasor[-1:, :]))
             '''
 
-            phasors_mir.append(phasor)
+            np.savetxt(phasors_mir_f, phasor)
 
             xfguard *= phasor
             # slice out only useful channels
@@ -307,21 +311,13 @@ class AntennaSource(object):
             data_out[:, fcstart:fcend, 0] = xfguard
 
         data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
-        np.save(data_out_fname, data_out)
+        #np.save(data_out_fname, data_out)
 
         del data_out, rawd
 
-        phasors = np.array(phasors)
-        phasors_fname = 'output/200430/f/phasors_{0:02d}.npy'.format(self.antno)
-        np.save(phasors_fname, phasors)
 
-        del phasors
-
-        phasors_mir = np.array(phasors_mir)
-        phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
-        np.save(phasors_mir_fname, phasors_mir)
-
-        del phasors_mir
+        phasors_f.close()
+        phasors_mir_f.close()
 
         exit()
 
