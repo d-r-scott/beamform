@@ -218,8 +218,8 @@ elif [ "$FRB" == "200430" ]; then
 	fi
 
 	i=1
-    # This value of n is the MAXIMUM POSSIBLE given the delays required
-	n=58242
+	#n=58240
+    n=48000
 	n_ant=26
 
 elif [ "$FRB" == "200906" ]; then
