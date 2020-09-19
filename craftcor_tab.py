@@ -336,7 +336,7 @@ class AntennaSource(object):
         #phasors_f.close()
         #phasors_mir_f.close()
 
-        exit()
+        #exit()
 
 
         return data_out
