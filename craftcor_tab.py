@@ -172,7 +172,8 @@ class AntennaSource(object):
         d1 = self.data
         nfine = corr.nfft - 2*corr.nguard_chan
 
-        for c in xrange(corr.ncoarse_chan):
+        def process_channel(c):
+        #for c in xrange(corr.ncoarse_chan):
             cfreq = corr.freqs[c]
             freqs = (np.arange(nfine, dtype=np.float) - float(nfine)/2.0)*corr.fine_chanbw
             if corr.sideband == -1:
@@ -203,7 +204,15 @@ class AntennaSource(object):
             # slice out only useful channels
             fcstart = c*nfine
             fcend = (c+1)*nfine
+            return fcstart, fcend, xfguard
+
+        channel_results = Paralel(n_jobs=4)(delayed(process_channel)(c) for c in xrange(corr.ncoarse_chan))
+
+        for result in channel_results:
+            fcstart, fcend, xfguard = result
             self.data[:, fcstart:fcend, 0] = xfguard
+
+
 
     def do_f_tab(self, corr, iant):
         self.frparams = FringeRotParams(corr, self)
