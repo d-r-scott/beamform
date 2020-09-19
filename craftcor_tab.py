@@ -19,6 +19,7 @@ import multiprocessing
 import signal
 import warnings
 from scipy.interpolate import interp1d
+from joblib import Parallel, delayed
 
 __author__ = "Keith Bannister <keith.bannister@csiro.au>"
 
@@ -263,7 +264,8 @@ class AntennaSource(object):
         #phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
         #phasors_mir_f = open(phasors_mir_fname, 'wb')
 
-        for c in xrange(corr.ncoarse_chan):
+        def process_channel(c):
+        #for c in xrange(corr.ncoarse_chan):
             cfreq = corr.freqs[c]
             freqs = (np.arange(nfine, dtype=np.float) - float(nfine)/2.0)*corr.fine_chanbw
             if corr.sideband == -1:
@@ -308,6 +310,12 @@ class AntennaSource(object):
             # slice out only useful channels
             fcstart = c*nfine
             fcend = (c+1)*nfine
+            return fcstart, fcend, xfguard
+
+        channel_results = Parallel(n_jobs=4)(delayed(process_channel)(c) for c in xrange(corr.ncoarse_chan))
+
+        for result in channel_results:
+            fcstart, fcend, xfguard = result
             data_out[:, fcstart:fcend, 0] = xfguard
 
         #data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
