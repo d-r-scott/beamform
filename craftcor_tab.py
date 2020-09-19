@@ -19,6 +19,7 @@ import multiprocessing
 import signal
 import warnings
 from scipy.interpolate import interp1d
+from joblib import Parallel, delayed
 
 __author__ = "Keith Bannister <keith.bannister@csiro.au>"
 
@@ -171,7 +172,8 @@ class AntennaSource(object):
         d1 = self.data
         nfine = corr.nfft - 2*corr.nguard_chan
 
-        for c in xrange(corr.ncoarse_chan):
+        def process_channel(c):
+        #for c in xrange(corr.ncoarse_chan):
             cfreq = corr.freqs[c]
             freqs = (np.arange(nfine, dtype=np.float) - float(nfine)/2.0)*corr.fine_chanbw
             if corr.sideband == -1:
@@ -202,7 +204,15 @@ class AntennaSource(object):
             # slice out only useful channels
             fcstart = c*nfine
             fcend = (c+1)*nfine
+            return fcstart, fcend, xfguard
+
+        channel_results = Paralel(n_jobs=4)(delayed(process_channel)(c) for c in xrange(corr.ncoarse_chan))
+
+        for result in channel_results:
+            fcstart, fcend, xfguard = result
             self.data[:, fcstart:fcend, 0] = xfguard
+
+
 
     def do_f_tab(self, corr, iant):
         self.frparams = FringeRotParams(corr, self)
@@ -263,7 +273,8 @@ class AntennaSource(object):
         #phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
         #phasors_mir_f = open(phasors_mir_fname, 'wb')
 
-        for c in xrange(corr.ncoarse_chan):
+        def process_channel(c):
+        #for c in xrange(corr.ncoarse_chan):
             cfreq = corr.freqs[c]
             freqs = (np.arange(nfine, dtype=np.float) - float(nfine)/2.0)*corr.fine_chanbw
             if corr.sideband == -1:
@@ -284,7 +295,7 @@ class AntennaSource(object):
             # blatetly clear what you should do
             phasor = np.exp(np.pi*2j*phases, dtype=np.complex64)
 
-            #np.savetxt(phasors_f, phasor)
+            np.save('output/200430/f/phasors_premir_ant{0:02d}_c{0:03d}.npy'.format(self.antno, c), phasor)
 
             freq_ghz = (cfreq+freqs)/1e3
             mir_cor = corr.mir.get_solution(iant,0,freq_ghz)
@@ -302,12 +313,18 @@ class AntennaSource(object):
             pylab.plot(np.angle(phasor[-1:, :]))
             '''
 
-            #np.savetxt(phasors_mir_f, phasor)
+            np.save('output/200430/f/phasors_postmir_ant{0:02d}_c{0:03d}.npy'.format(self.antno, c), phasor)
 
             xfguard *= phasor
             # slice out only useful channels
             fcstart = c*nfine
             fcend = (c+1)*nfine
+            return fcstart, fcend, xfguard
+
+        channel_results = Parallel(n_jobs=4)(delayed(process_channel)(c) for c in xrange(corr.ncoarse_chan))
+
+        for result in channel_results:
+            fcstart, fcend, xfguard = result
             data_out[:, fcstart:fcend, 0] = xfguard
 
         #data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
@@ -319,7 +336,7 @@ class AntennaSource(object):
         #phasors_f.close()
         #phasors_mir_f.close()
 
-        #exit()
+        exit()
 
 
         return data_out
