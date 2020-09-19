@@ -284,7 +284,7 @@ class AntennaSource(object):
             # blatetly clear what you should do
             phasor = np.exp(np.pi*2j*phases, dtype=np.complex64)
 
-            #np.savetxt(phasors_f, phasor)
+            np.save('output/200430/f/phasors_premir_ant{0:02d}_c{0:03d}.npy'.format(self.antno, c), phasor)
 
             freq_ghz = (cfreq+freqs)/1e3
             mir_cor = corr.mir.get_solution(iant,0,freq_ghz)
@@ -302,7 +302,7 @@ class AntennaSource(object):
             pylab.plot(np.angle(phasor[-1:, :]))
             '''
 
-            #np.savetxt(phasors_mir_f, phasor)
+            np.save('output/200430/f/phasors_postmir_ant{0:02d}_c{0:03d}.npy'.format(self.antno, c), phasor)
 
             xfguard *= phasor
             # slice out only useful channels
@@ -319,7 +319,7 @@ class AntennaSource(object):
         #phasors_f.close()
         #phasors_mir_f.close()
 
-        #exit()
+        exit()
 
 
         return data_out
