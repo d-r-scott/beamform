@@ -2,9 +2,9 @@
 
 #SBATCH --job-name=beamforming
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --time=1:00:00
-#SBATCH --mem=32g
+#SBATCH --ntasks=4
+#SBATCH --time=0:30:00
+#SBATCH --mem=128g
 
 # Command line arguments
 FRB=$1      # FRB name
