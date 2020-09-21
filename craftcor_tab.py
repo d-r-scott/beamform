@@ -304,14 +304,7 @@ class AntennaSource(object):
             if mir_cor[0] == 0: # if correction is 0, flag data
                 phasor *= 0
             else:
-                phasor /= mir_cor  # TODO investigate mir_cor - antenna correction?
-
-            # TODO plot all arrays here
-            '''
-            pylab.figure(10)
-            pylab.plot(np.angle(phasor[0, :]))
-            pylab.plot(np.angle(phasor[-1:, :]))
-            '''
+                phasor /= mir_cor
 
             #np.save('output/200430/f/phasors_postmir_ant{0:02d}_c{1:03d}.npy'.format(self.antno, c), phasor)
 
@@ -321,6 +314,8 @@ class AntennaSource(object):
             fcend = (c+1)*nfine
             data_out[:, fcstart:fcend, 0] = xfguard
 
+            # Plotting phasors
+            '''
             plt_phasor = phasor[::10000]
 
             min_real = min(np.min(np.real(plt_phasor)), min_real)
@@ -360,6 +355,7 @@ class AntennaSource(object):
 
         phs_fig.tight_layout()
         phs_fig.savefig('output/200430/f/phasors_postmir_phs_ant{0:02d}.png'.format(self.antno))
+        '''
 
         #data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
         #np.save(data_out_fname, data_out)
@@ -370,7 +366,7 @@ class AntennaSource(object):
         #phasors_f.close()
         #phasors_mir_f.close()
 
-        exit()
+        #exit()
 
 
         return data_out
