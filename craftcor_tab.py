@@ -263,6 +263,17 @@ class AntennaSource(object):
         #phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
         #phasors_mir_f = open(phasors_mir_fname, 'wb')
 
+        reim_fig, reim_axs = plt.subplots(16, 21, figsize=(21, 16))
+        flt_reim_axs = reim_axs.flatten()
+
+        abs_fig, abs_axs = plt.subplots(16, 21, figsize=(21, 16))
+        flt_abs_axs = abs_axs.flatten()
+
+        phs_fig, phs_axs = plt.subplots(16, 21, figsize=(21, 16))
+        flt_phs_axs = phs_axs.flatten()
+
+        min_real = max_real = min_imag = max_imag = min_abs = max_abs = min_phase = max_phase = 0
+
         for c in xrange(corr.ncoarse_chan):
             cfreq = corr.freqs[c]
             freqs = (np.arange(nfine, dtype=np.float) - float(nfine)/2.0)*corr.fine_chanbw
@@ -284,7 +295,7 @@ class AntennaSource(object):
             # blatetly clear what you should do
             phasor = np.exp(np.pi*2j*phases, dtype=np.complex64)
 
-            np.save('output/200430/f/phasors_premir_ant{0:02d}_c{0:03d}.npy'.format(self.antno, c), phasor)
+            #np.save('output/200430/f/phasors_premir_ant{0:02d}_c{1:03d}.npy'.format(self.antno, c), phasor)
 
             freq_ghz = (cfreq+freqs)/1e3
             mir_cor = corr.mir.get_solution(iant,0,freq_ghz)
@@ -302,13 +313,53 @@ class AntennaSource(object):
             pylab.plot(np.angle(phasor[-1:, :]))
             '''
 
-            np.save('output/200430/f/phasors_postmir_ant{0:02d}_c{0:03d}.npy'.format(self.antno, c), phasor)
+            #np.save('output/200430/f/phasors_postmir_ant{0:02d}_c{1:03d}.npy'.format(self.antno, c), phasor)
 
             xfguard *= phasor
             # slice out only useful channels
             fcstart = c*nfine
             fcend = (c+1)*nfine
             data_out[:, fcstart:fcend, 0] = xfguard
+
+            plt_phasor = phasor[::10000]
+
+            min_real = min(np.min(np.real(plt_phasor)), min_real)
+            max_real = max(np.max(np.real(plt_phasor)), max_real)
+            min_imag = min(np.min(np.imag(plt_phasor)), min_imag)
+            max_imag = max(np.max(np.imag(plt_phasor)), max_imag)
+            
+            flt_reim_axs[c].plot(np.real(plt_phasor), 'r', lw=1)
+            flt_reim_axs[c].plot(np.imag(plt_phasor), 'b', lw=1)
+            flt_reim_axs[c].set_xticks([])
+            flt_reim_axs[c].set_yticks([])
+
+            max_abs = max(np.max(np.abs(plt_phasor)**2), max_abs)
+            min_abs = min(np.min(np.abs(plt_phasor)**2), min_abs)
+
+            flt_abs_axs[c].plot(np.abs(plt_phasor)**2, 'g', lw=1)
+            flt_abs_axs[c].set_xticks([])
+            flt_abs_axs[c].set_yticks([])
+
+            min_phase = min(np.min(np.angle(plt_phasor)), min_phase)
+            max_phase = max(np.max(np.angle(plt_phasor)), max_phase)
+
+            flt_phs_axs[c].plot(np.angle(plt_phasor), 'k', lw=1)
+            flt_phs_axs[c].set_xticks([])
+            flt_phs_axs[c].set_yticks([])
+
+        for c in range(len(flt_reim_axs)):
+            flt_reim_axs[c].set_ylim((min(min_real, min_imag), max(max_real, max_imag)))
+            flt_abs_axs[c].set_ylim((min_abs, max_abs))
+            flt_phs_axs[c].set_ylim((min_phase, max_phase))
+
+        reim_fig.tight_layout()
+        reim_fig.savefig('output/200430/f/phasors_postmir_reim_ant{0:02d}.png'.format(self.antno))
+
+        abs_fig.tight_layout()
+        abs_fig.savefig('output/200430/f/phasors_postmir_abs_ant{0:02d}.png'.format(self.antno))
+
+        phs_fig.tight_layout()
+        phs_fig.savefig('output/200430/f/phasors_postmir_phs_ant{0:02d}.png'.format(self.antno))
 
         #data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
         #np.save(data_out_fname, data_out)
