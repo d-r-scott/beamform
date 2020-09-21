@@ -250,19 +250,10 @@ class AntennaSource(object):
 
         assert rawd.shape == (nsamp, corr.ncoarse_chan), 'Unexpected shape from vfile: {} expected ({},{})'.format(rawd.shape, nsamp, corr.ncoarse_chan)
 
-        # TODO save raw data here, plot as dynspec at 1 ms
-        #rawd_fname = 'output/200430/f/raw_{0:02d}.npy'.format(self.antno)
-        #np.save(rawd_fname, rawd)
-
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
-        d1 = data_out
         nfine = corr.nfft - 2*corr.nguard_chan
 
-        #phasors_fname = 'output/200430/f/phasors_{0:02d}.npy'.format(self.antno)
-        #phasors_f = open(phasors_fname, 'wb')
-        #phasors_mir_fname = 'output/200430/f/phasors_mir_{0:02d}.npy'.format(self.antno)
-        #phasors_mir_f = open(phasors_mir_fname, 'wb')
-
+        '''
         reim_fig, reim_axs = plt.subplots(16, 21, figsize=(21, 16))
         flt_reim_axs = reim_axs.flatten()
 
@@ -273,45 +264,97 @@ class AntennaSource(object):
         flt_phs_axs = phs_axs.flatten()
 
         min_real = max_real = min_imag = max_imag = min_abs = max_abs = min_phase = max_phase = 0
+        '''
 
         for c in xrange(corr.ncoarse_chan):
+            # Channel frequency
             cfreq = corr.freqs[c]
+
+            '''
+            Array of fine channel frequencies relative to coarse frequency
+            More appropriately named Delta_f?
+            '''
             freqs = (np.arange(nfine, dtype=np.float) - float(nfine)/2.0)*corr.fine_chanbw
+
+            # TODO: what is sideband?
             if corr.sideband == -1:
                 freqs = -freqs
 
+            '''
+            rawd's shape: (nsamp, corr.ncoarse_chan)
+            nsamp = input.i * (64 * input.n)
+            '''
+            '''
+            This next part is creating a dynamic spectrum within the coarse channel.
+            x1 = current coarse channel in rawd reshaped to (S0, nfft)
+            nfft = 64*input.n (-n flag)
+            S0 = whatever makes the data fit
+               = nsamp / nfft
+               = input.i (64 * input.n) / (64 * input.n)
+               = input.i
+            Note that if input.i == 1, this "dynamic spectrum" is just a spectrum.
             x1 = rawd[:, c].reshape(-1, corr.nfft)
-            xf1 = np.fft.fft(x1, axis=1)  # Create dynamic spectrum within the coarse channel
+            xf1 = np.fft.fft(x1, axis=1)
             xf1 = np.fft.fftshift(xf1, axes=1)
+            '''
+
+            # corr.nguard_chan = 5 * input.n = number of fine channels on each side to cut off
+            # xfguard is xf1 with the ends trimmed off
             xfguard = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
+
+            '''
+            fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
+            fixed_delay_us is contained in fcm.txt for each antenna
+            geom_delay_us = corr.get_geometric_delay_delayrate_us(self)[0]
+            geom_delay_us accounts for Earth's rotation
+            delta_t is total delay for this antenna
+            '''
             delta_t = -fixed_delay_us + geom_delay_us
+
+            '''
+            freqs + cfreq = array of absolute fine channel frequencies
+            phases = total delay * absolute frequencies (dimensionless)
+            '''
             phases = delta_t * (freqs + cfreq)
             logging.debug('PHASOR %s[%s] chan=%s freq=%sfixed=%f us geom=%f us delta_t %s us coff*fixed = %f deg coff*geom = %f deg',
                           self.antname, self.ia, c, cfreq, fixed_delay_us, geom_delay_us, delta_t, cfreq*fixed_delay_us*360., cfreq*geom_delay_us*360.)
 
+            # TODO: interpret this comment
+            #   If you plot the phases you're about to correct, after adding a artificial
+            #   1 sample delay ad tryig to get rid of it with a phase ramp, it becaomes
+            #   blatetly clear what you should do
 
-            # If you plot the phases you're about to correct, after adding a artificial
-            # 1 sample delay ad tryig to get rid of it with a phase ramp, it becaomes
-            # blatetly clear what you should do
+            # phasors to rotate the data with constant amplitude = 1
             phasor = np.exp(np.pi*2j*phases, dtype=np.complex64)
 
-            #np.save('output/200430/f/phasors_premir_ant{0:02d}_c{1:03d}.npy'.format(self.antno, c), phasor)
-
+            # get absolute frequencies in gigahertz
             freq_ghz = (cfreq+freqs)/1e3
-            mir_cor = corr.mir.get_solution(iant,0,freq_ghz)
-            #np.array([corr.mir.get_solution(iant, 0, f) for f in freq_ghz])
-            #mir_cor[np.where(mir_cor==0)] = np.nan
+
+            # get the calibration solutions and apply them to the phasors
+            mir_cor = corr.mir.get_solution(iant, 0, freq_ghz)
+
             if mir_cor[0] == 0: # if correction is 0, flag data
                 phasor *= 0
             else:
                 phasor /= mir_cor
 
-            #np.save('output/200430/f/phasors_postmir_ant{0:02d}_c{1:03d}.npy'.format(self.antno, c), phasor)
-
             xfguard *= phasor
-            # slice out only useful channels
+
+            # select the channels for this coarse channel
             fcstart = c*nfine
             fcend = (c+1)*nfine
+
+            '''
+            RECAP
+            xfguard is a "dynamic" spectrum of the current coarse channel in
+            only the fine channels not trimmed (oversampled PFB).
+            xfguard.shape == (input.i, 64 * input.n)
+            '''
+
+            '''
+            Slot xfguard (a trimmed spectrum for this coarse channel) into
+            the corresponding slice of the fine channels
+            '''
             data_out[:, fcstart:fcend, 0] = xfguard
 
             # Plotting phasors
@@ -355,19 +398,9 @@ class AntennaSource(object):
 
         phs_fig.tight_layout()
         phs_fig.savefig('output/200430/f/phasors_postmir_phs_ant{0:02d}.png'.format(self.antno))
+        
+        exit ()
         '''
-
-        #data_out_fname = 'output/200430/f/data_out_{0:02d}.npy'.format(self.antno)
-        #np.save(data_out_fname, data_out)
-
-        #del data_out, rawd
-
-
-        #phasors_f.close()
-        #phasors_mir_f.close()
-
-        #exit()
-
 
         return data_out
 
@@ -462,6 +495,8 @@ class Correlator(object):
 
     def parse_parset(self):
         self.parset = {}
+
+        # open the fcm file
         with open(self.values.parset, 'rU') as f:
             for line in f:
                 if '=' not in line or line.startswith('#'):
