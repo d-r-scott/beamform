@@ -191,6 +191,7 @@ class VcraftFile(object):
             d = d[sampoff:sampoff+nsamp, :, :]
             nsamps = nsamp
 
+        # AT LEAST FRB200430 ak01 uses mode 2 (do all CRAFT FRBs?)
         elif mode == 2: # 4b+4b
 
             wordidx = startsamp / 4 # which 32 bit word the start sample is in

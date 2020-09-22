@@ -307,7 +307,7 @@ class AntennaSource(object):
             fixed_delay_us is contained in fcm.txt for each antenna
             geom_delay_us = corr.get_geometric_delay_delayrate_us(self)[0]
             geom_delay_us accounts for Earth's rotation
-            delta_t is total delay for this antenna
+            delta_t is total fine delay for this antenna
             '''
             delta_t = -fixed_delay_us + geom_delay_us
 
