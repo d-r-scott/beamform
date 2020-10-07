@@ -9,10 +9,11 @@
 # Command line arguments
 FRB=$1  # FRB name
 pol=$2  # Polarisation (x or y)
+n=$3
 
 # Set data directories
 basedir=./output
-outdir=${basedir}/${FRB}
+outdir=${basedir}/${FRB}_n${n}
 f_outdir=${outdir}/f
 
 # Get modules to load and load them

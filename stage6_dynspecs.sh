@@ -9,10 +9,11 @@
 # Command line arguments
 FRB=$1  # FRB name
 DM=$2   # Dispersion measure in pc/cm3
+n=$3
 
 # Set data directories
 basedir=./output
-outdir=${basedir}/${FRB}
+outdir=${basedir}/${FRB}_n${n}
 f_outdir=${outdir}/f
 
 # Get modules to load and load them

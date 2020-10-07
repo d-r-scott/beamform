@@ -4,8 +4,8 @@
 FRB=$1
 # Following two are optional, only used when all_stages.sh is run.
 # They are used to allow all stages to be submitted at once.
-jobid3_x=$2
-jobid3_y=$3
+jobid3_x=$3
+jobid3_y=$4
 
 # NOTE: BOTH POLARISATIONS (X AND Y) WILL BE PROCESSED
 
@@ -16,11 +16,11 @@ source FRBdata.sh $FRB $a_or_m $pol
 echo "FRB$FRB"
 echo "DM= $DM"
 echo "f0= $f0"
-
+n=$2
 # Stage 4: Dedispersion
 out4=${logpre}_stage4.out
-args4_x="$FRB x $DM $f0"
-args4_y="$FRB y $DM $f0"
+args4_x="$FRB x $DM $f0 $n"
+args4_y="$FRB y $DM $f0 $n"
 
 # Check if we are provided with jobid3_x and jobid4_x, and if so, set them as dependencies for stage4.
 # If they're not provided, stage4 has no dependencies
@@ -40,8 +40,8 @@ jobid4_y=$(sbatch --output=$out4 --error=$out4 $dependency4_y stage4_dedispersio
 
 # Stage 5: IFFT
 out5=${logpre}_stage5.out
-args5_x="$FRB x $DM"
-args5_y="$FRB y $DM"
+args5_x="$FRB x $DM $n"
+args5_y="$FRB y $DM $n"
 
 echo "sbatch --output=$out5 --error=$out5 --dependency=afterok:$jobid4_x stage5_ifft.sh $args5_x"
 jobid5_x=$(sbatch --output=$out5 --error=$out5 --dependency=afterok:$jobid4_x stage5_ifft.sh $args5_x | cut -d " " -f 4)
@@ -51,7 +51,7 @@ jobid5_y=$(sbatch --output=$out5 --error=$out5 --dependency=afterok:$jobid4_y st
 
 # Stage 6: Generate dynamic spectra and calculate Stokes parameters
 out6=${logpre}_stage6.out
-args6="$FRB $DM"
+args6="$FRB $DM $n"
 
 echo "sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobid5_x:$jobid5_y stage6_dynspecs.sh $args6"
 sbatch --output=$out6 --error=$out6 --dependency=afterok:$jobid5_x:$jobid5_y stage6_dynspecs.sh $args6

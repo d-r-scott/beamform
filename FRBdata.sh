@@ -42,6 +42,7 @@ if [ "$FRB" == "180924" ]; then
 
 elif [ "$FRB" == "181112" ]; then
 	offset=2106003
+	#offset=0
 	DM=589.265
 	f0=1297.5
 	calcfile="${basedr}Calibration/aipscal/frb181112/c1_f0/craftfrb.im"
@@ -199,7 +200,8 @@ elif [ "$FRB" == "191228" ]; then
 
 elif [ "$FRB" == "200430" ]; then
 	offset=0
-	DM=381.045
+	#DM=381.045
+    DM=0
 	f0=864.5
 	#calcfile="/fred/oz002/users/dscott/Calibration/aipscal/frb200430/craftfrb_139162.im"
 	calcfile="/fred/oz002/askap/craft/frb200430/frb/data.1ms.dmshift2/c1_f0/craftfrb_204531.im"
@@ -218,8 +220,8 @@ elif [ "$FRB" == "200430" ]; then
 	fi
 
 	i=1
-	n=58240
-    #n=32000
+	#n=58240
+    n=58240
 	n_ant=26
 
 elif [ "$FRB" == "200906" ]; then
