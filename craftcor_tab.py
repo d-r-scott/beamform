@@ -229,6 +229,13 @@ class AntennaSource(object):
         frac_delay_samp = (total_delay_samp - whole_delay)
         frac_delay_us = frac_delay_samp *corr.fs
 
+        data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
+        nfine = corr.nfft - 2*corr.nguard_chan
+
+        # time-dependent geometric delays
+        # nfine is also the number of time samples (also time in us)
+        geom_delays_us = geom_delay_us + geom_delay_rate_us * nfine
+
         # get data
         nsamp = corr.nint*corr.nfft
         logging.debug('F %s sample delays: frame: %f geo %f fixed %f total %f whole: %d frac: %f nsamp: %d phase=%f deg',
@@ -250,21 +257,6 @@ class AntennaSource(object):
 
         assert rawd.shape == (nsamp, corr.ncoarse_chan), 'Unexpected shape from vfile: {} expected ({},{})'.format(rawd.shape, nsamp, corr.ncoarse_chan)
 
-        data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
-        nfine = corr.nfft - 2*corr.nguard_chan
-
-        '''
-        reim_fig, reim_axs = plt.subplots(16, 21, figsize=(21, 16))
-        flt_reim_axs = reim_axs.flatten()
-
-        abs_fig, abs_axs = plt.subplots(16, 21, figsize=(21, 16))
-        flt_abs_axs = abs_axs.flatten()
-
-        phs_fig, phs_axs = plt.subplots(16, 21, figsize=(21, 16))
-        flt_phs_axs = phs_axs.flatten()
-
-        min_real = max_real = min_imag = max_imag = min_abs = max_abs = min_phase = max_phase = 0
-        '''
 
         for c in xrange(corr.ncoarse_chan):
             # Channel frequency
@@ -307,15 +299,16 @@ class AntennaSource(object):
             fixed_delay_us is contained in fcm.txt for each antenna
             geom_delay_us = corr.get_geometric_delay_delayrate_us(self)[0]
             geom_delay_us accounts for Earth's rotation
-            delta_t is total fine delay for this antenna
             '''
-            delta_t = -fixed_delay_us + geom_delay_us
+            # Fringe rotation for Earth's rotation
+            phases_fringe = cfreq * geom_delays_us
 
-            '''
-            freqs + cfreq = array of absolute fine channel frequencies
-            phases = total delay * absolute frequencies (dimensionless)
-            '''
-            phases = delta_t * (freqs + cfreq)
+            # Fractional sample phases
+            phases_frac = freqs * np.mean(geom_delays_us)
+
+            # Total phases
+            phases = phases_fringe + phases_frac
+
             logging.debug('PHASOR %s[%s] chan=%s freq=%sfixed=%f us geom=%f us delta_t %s us coff*fixed = %f deg coff*geom = %f deg',
                           self.antname, self.ia, c, cfreq, fixed_delay_us, geom_delay_us, delta_t, cfreq*fixed_delay_us*360., cfreq*geom_delay_us*360.)
 
@@ -355,51 +348,6 @@ class AntennaSource(object):
             the corresponding slice of the fine channels
             '''
             data_out[:, fcstart:fcend, 0] = xfguard
-
-            # Plotting phasors
-            '''
-            plt_phasor = phasor[::10000]
-
-            min_real = min(np.min(np.real(plt_phasor)), min_real)
-            max_real = max(np.max(np.real(plt_phasor)), max_real)
-            min_imag = min(np.min(np.imag(plt_phasor)), min_imag)
-            max_imag = max(np.max(np.imag(plt_phasor)), max_imag)
-            
-            flt_reim_axs[c].plot(np.real(plt_phasor), 'r', lw=1)
-            flt_reim_axs[c].plot(np.imag(plt_phasor), 'b', lw=1)
-            flt_reim_axs[c].set_xticks([])
-            flt_reim_axs[c].set_yticks([])
-
-            max_abs = max(np.max(np.abs(plt_phasor)**2), max_abs)
-            min_abs = min(np.min(np.abs(plt_phasor)**2), min_abs)
-
-            flt_abs_axs[c].plot(np.abs(plt_phasor)**2, 'g', lw=1)
-            flt_abs_axs[c].set_xticks([])
-            flt_abs_axs[c].set_yticks([])
-
-            min_phase = min(np.min(np.angle(plt_phasor)), min_phase)
-            max_phase = max(np.max(np.angle(plt_phasor)), max_phase)
-
-            flt_phs_axs[c].plot(np.angle(plt_phasor), 'k', lw=1)
-            flt_phs_axs[c].set_xticks([])
-            flt_phs_axs[c].set_yticks([])
-
-        for c in range(len(flt_reim_axs)):
-            flt_reim_axs[c].set_ylim((min(min_real, min_imag), max(max_real, max_imag)))
-            flt_abs_axs[c].set_ylim((min_abs, max_abs))
-            flt_phs_axs[c].set_ylim((min_phase, max_phase))
-
-        reim_fig.tight_layout()
-        reim_fig.savefig('output/200430/f/phasors_postmir_reim_ant{0:02d}.png'.format(self.antno))
-
-        abs_fig.tight_layout()
-        abs_fig.savefig('output/200430/f/phasors_postmir_abs_ant{0:02d}.png'.format(self.antno))
-
-        phs_fig.tight_layout()
-        phs_fig.savefig('output/200430/f/phasors_postmir_phs_ant{0:02d}.png'.format(self.antno))
-        
-        exit ()
-        '''
 
         return data_out
 
