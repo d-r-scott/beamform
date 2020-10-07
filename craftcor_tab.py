@@ -272,6 +272,7 @@ class AntennaSource(object):
             if corr.sideband == -1:
                 freqs = -freqs
 
+
             '''
             rawd's shape: (nsamp, corr.ncoarse_chan)
             nsamp = input.i * (64 * input.n)
@@ -285,10 +286,10 @@ class AntennaSource(object):
                = input.i (64 * input.n) / (64 * input.n)
                = input.i
             Note that if input.i == 1, this "dynamic spectrum" is just a spectrum.
+            '''
             x1 = rawd[:, c].reshape(-1, corr.nfft)
             xf1 = np.fft.fft(x1, axis=1)
             xf1 = np.fft.fftshift(xf1, axes=1)
-            '''
 
             # corr.nguard_chan = 5 * input.n = number of fine channels on each side to cut off
             # xfguard is xf1 with the ends trimmed off
