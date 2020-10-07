@@ -16,14 +16,6 @@ basedir=./output
 outdir=${basedir}/${FRB}
 f_outdir=${outdir}/f
 
-if [ ! -d $outdir ]; then
-  mkdir $outdir
-fi
-
-if [ ! -d $f_outdir ]; then
-  mkdir $f_outdir
-fi
-
 source FRBdata.sh $FRB $a_or_m $pol
 echo "FRB$FRB"
 echo "offset=		$offset"
@@ -36,8 +28,21 @@ echo "aips=		$aips"
 echo "mir=	$mir"
 echo "f_vcraft=	$f_vcraft"
 echo "i=  $i"
+n=$4
 echo "n=  $n"
 echo "n_ant=  $n_ant"
+
+# TEMP
+outdir=${outdir}_n${n}
+f_outdir=${outdir}/f
+
+if [ ! -d $outdir ]; then
+  mkdir $outdir
+fi
+
+if [ ! -d $f_outdir ]; then
+  mkdir $f_outdir
+fi
 
 # Stage 1: Per-antenna beamforming
 
@@ -71,14 +76,14 @@ done
 
 # Stage 2: Summing fine channel spectra
 out2=${logpre}_stage2.out
-args2="$FRB $pol"
+args2="$FRB $pol $n"
 
 echo "sbatch --output=$out2 --error=$out2 --dependency=afterok$jobid1 stage2_summing.sh $args2"
 jobid2=$(sbatch --output=$out2 --error=$out2 --dependency=afterok$jobid1 stage2_summing.sh $args2 | cut -d " " -f 4)
 
 # Stage 3: Derippling
 out3=${logpre}_stage3.out
-args3="$FRB $pol $fftlen"   # fftlen was exported by stage1_beamforming.sh
+args3="$FRB $pol $fftlen $n"   # fftlen was exported by stage1_beamforming.sh
 
 echo "sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3"
 jobid3=$(sbatch --output=$out3 --error=$out3 --dependency=afterok:$jobid2 stage3_derippling.sh $args3 | cut -d " " -f 4)

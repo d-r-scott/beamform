@@ -22,7 +22,7 @@ hwfile=${12}   # Hardware delays. Probably not there for newer FRBs.
 
 # Set data directories - stage123.sh has already ensured they exist
 basedir=./output
-outdir=${basedir}/${FRB}
+outdir=${basedir}/${FRB}_n${n}
 f_outdir=${outdir}/f
 
 # Get modules to load and load them

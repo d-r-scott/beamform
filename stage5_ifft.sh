@@ -10,10 +10,11 @@
 FRB=$1  # FRB name
 pol=$2  # Polarisation (x or y)
 DM=$3   # Dispersion measure in pc/cm3
+n=$4
 
 # Set data directories
 basedir=./output
-outdir=${basedir}/${FRB}
+outdir=${basedir}/${FRB}_n${n}
 f_outdir=${outdir}/f
 
 # Get modules to load and load them
