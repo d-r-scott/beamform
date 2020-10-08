@@ -234,7 +234,7 @@ class AntennaSource(object):
 
         # time-dependent geometric delays
         # nfine is also the number of time samples (also time in us)
-        geom_delays_us = geom_delay_us + geom_delay_rate_us * nfine
+        geom_delays_us = geom_delay_us + geom_delay_rate_us * nfine + fixed_delay_us
 
         # get data
         nsamp = corr.nint*corr.nfft
