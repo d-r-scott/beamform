@@ -236,23 +236,32 @@ class AntennaSource(object):
         # nfine is also the number of time samples (also time in us)
         geom_delays_us = geom_delay_us + geom_delay_rate_us * nfine - fixed_delay_us
 
+        print('')
+        basestr = '{} : {}'
+        print(basestr.format('framediff_samp', framediff_samp))
+        print(basestr.format('framediff_us', framediff_us))
+        print(basestr.format('geom_delay_us', geom_delay_us))
+        print(basestr.format('geom_delay_rate_us', geom_delay_rate_us))
+        print(basestr.format('geom_delay_samp', geom_delay_samp))
+        print(basestr.format('fixed_delay_us', fixed_delay_us))
+        print(basestr.format('fixed_delay_samp', fixed_delay_samp))
+        print(basestr.format('total_delay_samp', total_delay_samp))
+        print(basestr.format('whole_delay', whole_delay))
+        print(basestr.format('total_delay_us', total_delay_us))
+        print(basestr.format('whole_delay_us', whole_delay_us))
+        print(basestr.format('frac_delay_samp', frac_delay_samp))
+        print(basestr.format('frac_delay_us', frac_delay_us))
+        print('')
+
         # get data
         nsamp = corr.nint*corr.nfft
-        logging.debug('F %s sample delays: frame: %f geo %f fixed %f total %f whole: %d frac: %f nsamp: %d phase=%f deg',
-            self.antname, framediff_samp, geom_delay_samp, fixed_delay_samp,
-            total_delay_samp, whole_delay, frac_delay_samp, nsamp,
-            360.*frac_delay_us*corr.f0)
-        logging.debug('F %s us delays: frame: %f geo %f fixed %f total %f whole: %d frac: %f nsamp: %d phase=%f deg rate=%e',
-                self.antname, framediff_us, geom_delay_us, fixed_delay_us,
-                total_delay_us, whole_delay_us, frac_delay_us, nsamp,
-                      360.*frac_delay_us*corr.f0, geom_delay_rate_us)
 
         sampoff = whole_delay + corr.abs_delay
         print("antenna #: ",iant, self.antname)
         frameid = self.vfile.start_frameid+sampoff
         print('FRAMEID: '+str(frameid)+', remainder from 32: '+str(frameid % 32))
         # To avoid iPFB fractional delay, set FRAMEID such that the remainder is 0
-        #print(sampoff, nsamp)
+
         rawd = self.vfile.read(sampoff, nsamp)  # TODO HERE'S THE DATA
 
         assert rawd.shape == (nsamp, corr.ncoarse_chan), 'Unexpected shape from vfile: {} expected ({},{})'.format(rawd.shape, nsamp, corr.ncoarse_chan)
