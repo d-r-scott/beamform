@@ -234,7 +234,7 @@ class AntennaSource(object):
 
         # time-dependent geometric delays
         # nfine is also the number of time samples (also time in us)
-        geom_delays_us = geom_delay_us + geom_delay_rate_us * nfine + fixed_delay_us
+        geom_delays_us = geom_delay_us + geom_delay_rate_us * nfine - fixed_delay_us
 
         # get data
         nsamp = corr.nint*corr.nfft
@@ -487,6 +487,7 @@ class Correlator(object):
         fr1 = FringeRotParams(self, ant)
         fr2 = FringeRotParams(self, self.refant)
 
+        # TODO: There is a discrepancy here, below comment says fr1 is ref ant, but above suggests fr2 is?
         # fr1: reference antenna
         # Account for effects of Earth's rotation
         delay = fr1.delay - fr2.delay
