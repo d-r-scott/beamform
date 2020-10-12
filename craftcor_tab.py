@@ -233,8 +233,9 @@ class AntennaSource(object):
         nfine = corr.nfft - 2*corr.nguard_chan
 
         # time-dependent geometric delays
-        # nfine is also the number of time samples (also time in us)
-        geom_delays_us = geom_delay_us + geom_delay_rate_us * nfine - fixed_delay_us
+        # nfine is also the number of us in the data, so np.arange(nfine) is
+        # a time axis with units of us
+        geom_delays_us = geom_delay_us + geom_delay_rate_us * np.arange(nfine) - fixed_delay_us
 
         print('')
         basestr = '{} : {}'
