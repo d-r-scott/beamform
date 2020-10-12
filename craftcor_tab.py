@@ -272,6 +272,7 @@ class AntennaSource(object):
         for c in xrange(corr.ncoarse_chan):
             # Channel frequency
             cfreq = corr.freqs[c]
+            print(cfreq)
 
             '''
             Array of fine channel frequencies relative to coarse frequency
@@ -317,7 +318,7 @@ class AntennaSource(object):
             phases_fringe = cfreq * geom_delays_us
 
             # Fractional sample phases
-            phases_frac = freqs * np.mean(geom_delays_us)
+            phases_frac = (freqs+cfreq) * np.mean(geom_delays_us)
 
             # Total phases
             phases = phases_fringe + phases_frac
