@@ -243,6 +243,7 @@ class AntennaSource(object):
         print(basestr.format('geom_delay_us', geom_delay_us))
         print(basestr.format('geom_delay_rate_us', geom_delay_rate_us))
         print(basestr.format('geom_delay_samp', geom_delay_samp))
+        print(basestr.format('np.mean(deom_delays_us)', np.mean(geom_delays_us)))
         print(basestr.format('fixed_delay_us', fixed_delay_us))
         print(basestr.format('fixed_delay_samp', fixed_delay_samp))
         print(basestr.format('total_delay_samp', total_delay_samp))
@@ -274,6 +275,7 @@ class AntennaSource(object):
             '''
             Array of fine channel frequencies relative to coarse frequency
             More appropriately named Delta_f?
+            Goes from -0.5 to 0.5
             '''
             freqs = (np.arange(nfine, dtype=np.float) - float(nfine)/2.0)*corr.fine_chanbw
 
@@ -499,8 +501,10 @@ class Correlator(object):
         # TODO: There is a discrepancy here, below comment says fr1 is ref ant, but above suggests fr2 is?
         # fr1: reference antenna
         # Account for effects of Earth's rotation
-        delay = fr1.delay - fr2.delay
-        delayrate = fr1.delay_rate - fr2.delay_rate
+        #delay = fr1.delay - fr2.delay
+        #delayrate = fr1.delay_rate - fr2.delay_rate
+        delay = fr2.delay - fr1.delay
+        delayrate = fr2.delay_rate - fr1.delay_rate
 
         return (delay, delayrate)
 
