@@ -308,7 +308,9 @@ class AntennaSource(object):
 
             # corr.nguard_chan = 5 * input.n = number of fine channels on each side to cut off
             # xfguard is xf1 with the ends trimmed off
-            xfguard = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
+            xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
+
+            xfguard_t = np.fft.ifft(xfguard_f, axis=1)
 
             '''
             fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
@@ -317,13 +319,16 @@ class AntennaSource(object):
             geom_delay_us accounts for Earth's rotation
             '''
             # Fringe rotation for Earth's rotation
-            phases_fringe = cfreq * geom_delays_us
+            turn_fringe = cfreq * geom_delays_us
+
+            phasor_fringe = np.exp(np.pi * 2j * turn_fringe, dtype=np.complex64)
+
+            xfguard_t *= phasor_fringe
+
+            xfguard_f = np.fft.fft(xfguard_t, axis=1)
 
             # Fractional sample phases
-            phases_frac = freqs * np.mean(geom_delays_us)
-
-            # Total phases
-            phases = phases_fringe + phases_frac
+            turn_frac = freqs * np.mean(geom_delays_us)
 
             #logging.debug('PHASOR %s[%s] chan=%s freq=%sfixed=%f us geom=%f us delta_t %s us coff*fixed = %f deg coff*geom = %f deg',
             #             self.antname, self.ia, c, cfreq, fixed_delay_us, geom_delay_us, delta_t, cfreq*fixed_delay_us*360., cfreq*geom_delay_us*360.)
@@ -333,7 +338,7 @@ class AntennaSource(object):
             #   blatetly clear what you should do
 
             # phasors to rotate the data with constant amplitude = 1
-            phasor = np.exp(np.pi*2j*phases, dtype=np.complex64)
+            phasor = np.exp(np.pi * 2j * turn_frac, dtype=np.complex64)
 
             # get absolute frequencies in gigahertz
             freq_ghz = (cfreq+freqs)/1e3
@@ -346,7 +351,7 @@ class AntennaSource(object):
             else:
                 phasor /= mir_cor
 
-            xfguard *= phasor
+            xfguard_f *= phasor
 
             # select the channels for this coarse channel
             fcstart = c*nfine
