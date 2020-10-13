@@ -210,8 +210,8 @@ class AntennaSource(object):
         framediff_samp = corr.refant.trigger_frame - self.trigger_frame
         framediff_us = framediff_samp / corr.fs
         (geom_delay_us, geom_delay_rate_us) = corr.get_geometric_delay_delayrate_us(self)
-        samp_us = 1.0/336.0
-        geom_delay_rate_us *= samp_us   # set the units of geom_delay_rate_us to us/us instead of us/sample
+        #samp_us = 1.0/336.0
+        #geom_delay_rate_us *= samp_us   # set the units of geom_delay_rate_us to us/us instead of us/sample
         self.all_geom_delays.append(geom_delay_us)
         self.all_mjds.append(corr.curr_mjd_mid)
 
@@ -237,7 +237,7 @@ class AntennaSource(object):
         # time-dependent geometric delays
         # nfine is also the number of us in the data, so np.arange(nfine) is
         # a time axis with units of us
-        geom_delays_us = geom_delay_us + geom_delay_rate_us * np.arange(nfine) - fixed_delay_us
+        geom_delays_us = geom_delay_us + geom_delay_rate_us * np.linspace(0, 1, nfine) - fixed_delay_us
 
         print('')
         basestr = '{} : {}'
