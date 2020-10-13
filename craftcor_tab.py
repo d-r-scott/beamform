@@ -210,6 +210,8 @@ class AntennaSource(object):
         framediff_samp = corr.refant.trigger_frame - self.trigger_frame
         framediff_us = framediff_samp / corr.fs
         (geom_delay_us, geom_delay_rate_us) = corr.get_geometric_delay_delayrate_us(self)
+        samp_us = 1/336
+        geom_delay_rate_us *= samp_us   # set the units of geom_delay_rate_us to us/us instead of us/sample
         self.all_geom_delays.append(geom_delay_us)
         self.all_mjds.append(corr.curr_mjd_mid)
 
@@ -318,7 +320,7 @@ class AntennaSource(object):
             phases_fringe = cfreq * geom_delays_us
 
             # Fractional sample phases
-            phases_frac = (freqs+cfreq) * np.mean(geom_delays_us)
+            phases_frac = freqs * np.mean(geom_delays_us)
 
             # Total phases
             phases = phases_fringe + phases_frac
