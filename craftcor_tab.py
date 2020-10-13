@@ -368,7 +368,7 @@ class AntennaSource(object):
             Slot xfguard (a trimmed spectrum for this coarse channel) into
             the corresponding slice of the fine channels
             '''
-            data_out[:, fcstart:fcend, 0] = xfguard
+            data_out[:, fcstart:fcend, 0] = xfguard_f
 
         return data_out
 
