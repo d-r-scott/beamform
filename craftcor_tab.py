@@ -310,7 +310,7 @@ class AntennaSource(object):
             # xfguard is xf1 with the ends trimmed off
             xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
 
-            xfguard_t = np.fft.ifft(xfguard_f, axis=1)
+            xfguard_t = np.fft.ifft(np.fft.ifftshift(xfguard_f, axis=1), axes=1)
 
             '''
             fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
@@ -326,6 +326,7 @@ class AntennaSource(object):
             xfguard_t *= phasor_fringe
 
             xfguard_f = np.fft.fft(xfguard_t, axis=1)
+            xfguard_f = np.fft.fftshift(xfguard_f, axes=1)
 
             # Fractional sample phases
             turn_frac = freqs * np.mean(geom_delays_us)
