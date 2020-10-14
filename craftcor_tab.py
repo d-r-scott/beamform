@@ -235,9 +235,9 @@ class AntennaSource(object):
         nfine = corr.nfft - 2*corr.nguard_chan
 
         # time-dependent geometric delays
-        # nfine is also the number of us in the data, so np.arange(nfine) is
-        # a time axis with units of us
-        geom_delays_us = geom_delay_us + geom_delay_rate_us * np.linspace(0, 1, nfine) - fixed_delay_us
+        # nfft == 64*input.n, and np.linspace(0, 1, nfft) == time in units of
+        # integrations
+        geom_delays_us = geom_delay_us + geom_delay_rate_us * np.linspace(0, 1, nfft) - fixed_delay_us
 
         print('')
         basestr = '{} : {}'
@@ -292,25 +292,7 @@ class AntennaSource(object):
             rawd's shape: (nsamp, corr.ncoarse_chan)
             nsamp = input.i * (64 * input.n)
             '''
-            '''
-            This next part is creating a dynamic spectrum within the coarse channel.
-            x1 = current coarse channel in rawd reshaped to (S0, nfft)
-            nfft = 64*input.n (-n flag)
-            S0 = whatever makes the data fit
-               = nsamp / nfft
-               = input.i (64 * input.n) / (64 * input.n)
-               = input.i
-            Note that if input.i == 1, this "dynamic spectrum" is just a spectrum.
-            '''
             x1 = rawd[:, c].reshape(-1, corr.nfft)
-            xf1 = np.fft.fft(x1, axis=1)
-            xf1 = np.fft.fftshift(xf1, axes=1)
-
-            # corr.nguard_chan = 5 * input.n = number of fine channels on each side to cut off
-            # xfguard is xf1 with the ends trimmed off
-            xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
-
-            xfguard_t = np.fft.ifft(np.fft.ifftshift(xfguard_f, axes=1), axis=1)
 
             '''
             fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
@@ -323,10 +305,13 @@ class AntennaSource(object):
 
             phasor_fringe = np.exp(np.pi * 2j * turn_fringe, dtype=np.complex64)
 
-            xfguard_t *= phasor_fringe
+            x1 *= phasor_fringe
 
-            xfguard_f = np.fft.fft(xfguard_t, axis=1)
-            xfguard_f = np.fft.fftshift(xfguard_f, axes=1)
+            # corr.nguard_chan = 5 * input.n = number of fine channels on each side to cut off
+            # xfguard is xf1 with the ends trimmed off
+            xf1 = np.fft.fft(x1, axis=1)
+            xf1 = np.fft.fftshift(xf1, axes=1)
+            xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
 
             # Fractional sample phases
             turn_frac = freqs * np.mean(geom_delays_us)
