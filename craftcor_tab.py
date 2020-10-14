@@ -310,7 +310,7 @@ class AntennaSource(object):
             # xfguard is xf1 with the ends trimmed off
             xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:] # scale because oterhwise it overflows
 
-            xfguard_t = np.fft.ifft(np.fft.ifftshift(xfguard_f, axis=1), axes=1)
+            xfguard_t = np.fft.ifft(np.fft.ifftshift(xfguard_f, axes=1), axis=1)
 
             '''
             fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
