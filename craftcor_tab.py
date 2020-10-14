@@ -234,10 +234,12 @@ class AntennaSource(object):
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
         nfine = corr.nfft - 2*corr.nguard_chan
 
+        # get data
+        nsamp = corr.nint*corr.nfft
+
         # time-dependent geometric delays
-        # nfft == 64*input.n, and np.linspace(0, 1, nfft) == time in units of
-        # integrations
-        geom_delays_us = geom_delay_us + geom_delay_rate_us * np.linspace(0, 1, nfft) - fixed_delay_us
+        # np.linspace(0, 1, nsamp) == time in units of integrations
+        geom_delays_us = geom_delay_us + geom_delay_rate_us * np.linspace(0, 1, nsamp) - fixed_delay_us
 
         print('')
         basestr = '{} : {}'
@@ -257,8 +259,6 @@ class AntennaSource(object):
         print(basestr.format('frac_delay_us', frac_delay_us))
         print('')
 
-        # get data
-        nsamp = corr.nint*corr.nfft
 
         sampoff = whole_delay + corr.abs_delay
         print("antenna #: ",iant, self.antname)
