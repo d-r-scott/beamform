@@ -239,6 +239,7 @@ class AntennaSource(object):
         # time-dependent geometric delays
         # np.linspace(0, 1, nsamp) == time in units of integrations
         geom_delays_us = geom_delay_us + geom_delay_rate_us * np.linspace(0, 1, nsamp) - fixed_delay_us
+        np.save('delays/geom_delays_us_{}'.format(iant), geom_delays_us)
 
         print('')
         basestr = '{} : {}'
@@ -313,6 +314,7 @@ class AntennaSource(object):
 
             # Fractional sample phases
             turn_frac = freqs * np.mean(geom_delays_us)
+            np.save('delays/turn_frac_{}_{}'.format(iant, cfreq), turn_frac)
 
             #logging.debug('PHASOR %s[%s] chan=%s freq=%sfixed=%f us geom=%f us delta_t %s us coff*fixed = %f deg coff*geom = %f deg',
             #             self.antname, self.ia, c, cfreq, fixed_delay_us, geom_delay_us, delta_t, cfreq*fixed_delay_us*360., cfreq*geom_delay_us*360.)
