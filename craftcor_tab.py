@@ -234,7 +234,6 @@ class AntennaSource(object):
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in), dtype=np.complex64)
         nfine = corr.nfft - 2*corr.nguard_chan
 
-        # get data
         nsamp = corr.nint*corr.nfft
 
         # time-dependent geometric delays
@@ -274,7 +273,6 @@ class AntennaSource(object):
         for c in xrange(corr.ncoarse_chan):
             # Channel frequency
             cfreq = corr.freqs[c]
-            print(cfreq)
 
             '''
             Array of fine channel frequencies relative to coarse frequency
@@ -498,7 +496,7 @@ class Correlator(object):
         # Account for effects of Earth's rotation
         #delay = fr1.delay - fr2.delay
         #delayrate = fr1.delay_rate - fr2.delay_rate
-        delay = fr2.delay - fr1.delay
+        delay = fr2.delay_start - fr1.delay_start
         delayrate = fr2.delay_rate - fr1.delay_rate
 
         return (delay, delayrate)
