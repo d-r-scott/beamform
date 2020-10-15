@@ -271,9 +271,12 @@ class AntennaSource(object):
         assert rawd.shape == (nsamp, corr.ncoarse_chan), 'Unexpected shape from vfile: {} expected ({},{})'.format(rawd.shape, nsamp, corr.ncoarse_chan)
 
 
-        for c in xrange(corr.ncoarse_chan):
+        turn_fracs = np.zeros((336, nfine+1))
+
+        for i, c in enumerate(xrange(corr.ncoarse_chan)):
             # Channel frequency
             cfreq = corr.freqs[c]
+            turn_fracs[i, 0] = cfreq
 
             '''
             Array of fine channel frequencies relative to coarse frequency
@@ -314,7 +317,7 @@ class AntennaSource(object):
 
             # Fractional sample phases
             turn_frac = freqs * np.mean(geom_delays_us)
-            np.save('delays/turn_frac_{}_{}'.format(iant, cfreq), turn_frac)
+            turn_fracs[i, 1:] = turn_frac
 
             #logging.debug('PHASOR %s[%s] chan=%s freq=%sfixed=%f us geom=%f us delta_t %s us coff*fixed = %f deg coff*geom = %f deg',
             #             self.antname, self.ia, c, cfreq, fixed_delay_us, geom_delay_us, delta_t, cfreq*fixed_delay_us*360., cfreq*geom_delay_us*360.)
@@ -356,6 +359,7 @@ class AntennaSource(object):
             '''
             data_out[:, fcstart:fcend, 0] = xfguard_f
 
+        np.save('delays/turn_fracs_{}'.format(iant), turn_fracs)
         return data_out
 
             
