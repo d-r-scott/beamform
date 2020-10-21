@@ -502,8 +502,8 @@ class Correlator(object):
         # Account for effects of Earth's rotation
         #delay = fr1.delay - fr2.delay
         #delayrate = fr1.delay_rate - fr2.delay_rate
-        delay = fr2.delay_start - fr1.delay_start
-        delayrate = fr2.delay_rate - fr1.delay_rate
+        delay = fr1.delay_start - fr2.delay_start
+        delayrate = fr1.delay_rate - fr2.delay_rate
 
         with open('delays/{}_ant_delays.dat'.format(ant.antno), 'w') as f:
             f.write('#field fr1({}) fr2({})\n'.format(ant, self.refant))
