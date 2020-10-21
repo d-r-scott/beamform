@@ -505,7 +505,7 @@ class Correlator(object):
         delay = fr2.delay_start - fr1.delay_start
         delayrate = fr2.delay_rate - fr1.delay_rate
 
-        with open('{}_delays.dat'.format(ant), 'w') as f:
+        with open('delays/{}_ant_delays.dat'.format(ant.antno), 'w') as f:
             f.write('#field fr1({}) fr2({})\n'.format(ant, self.refant))
             f.write('delay_start {} {}\n'.format(fr1.delay_start, fr2.delay_start))
             f.write('delay {} {}\n'.format(fr1.delay, fr2.delay))
