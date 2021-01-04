@@ -22,7 +22,12 @@ from scipy.interpolate import interp1d
 
 __author__ = "Keith Bannister <keith.bannister@csiro.au>"
 
-CLIGHT=299792458.0
+# constants
+C_LIGHT = 299792458.0   # Speed of light (m/s)
+CHAN_BWIDTH = 27.0      # Channel bandwidth
+OS_NYQ_BWIDTH = 32.0    # Oversampled Nyquist bandwidth
+F_OS = OS_NYQ_BWIDTH / CHAN_BWIDTH  # Oversampling factor
+NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH    # Number of guard channels
 
 # TODO: Cleanup (not in any particular order)
 #   (1) PEP-008ify everything
@@ -519,7 +524,7 @@ class Correlator(object):
         # TODO: (1, 2, 3, 4)
         fr1 = FringeRotParams(self, ant1)
         fr2 = FringeRotParams(self, ant2)
-        uvw = np.array([fr1.u - fr2.u, fr1.v - fr2.v, fr1.w - fr2.w])/CLIGHT
+        uvw = np.array([fr1.u - fr2.u, fr1.v - fr2.v, fr1.w - fr2.w]) / C_LIGHT
 
         return uvw
 
