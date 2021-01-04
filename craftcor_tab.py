@@ -968,18 +968,26 @@ class MiriadGainSolutions(object):
         return #added by hyerin
 
 
-def load_sources(calcfile):
-    # TODO: (1, 2, 3, 4, 5)
-    calc_input = calcfile.replace('.im','.calc')
+def load_sources(calc_file):
+    """Loads the source in the given calc file
+
+    :param calc_file: File containing source information
+    :return: List containing one source dict.
+             Source dict contains source name, RA, and DEC (in radians)
+    """
+    # TODO: (2, 5)
+    calc_input = calc_file.replace('.im', '.calc')
+
     d = {}
     for line in open(calc_input, 'rU'):
         if len(line) == 0 or line.startswith('#'):
             continue
+
         bits = line.split(':')
         if len(bits) != 2:
             continue
         
-        k,v = bits
+        k, v = bits
 
         d[k.strip()] = v.strip()
 
@@ -988,8 +996,8 @@ def load_sources(calcfile):
     # ra/dec in radians
     ra = float(d['SOURCE 0 RA'])
     dec = float(d['SOURCE 0 DEC'])
-    pos = SkyCoord(ra, dec, unit=('rad','rad'), frame='icrs')
-    sources = [{'name':name,'ra':pos.ra.deg,'dec':pos.dec.deg}]
+    pos = SkyCoord(ra, dec, unit=('rad', 'rad'), frame='icrs')
+    sources = [{'name' : name, 'ra' : pos.ra.deg, 'dec' : pos.dec.deg}]
 
     return sources
 
@@ -1001,7 +1009,6 @@ def get_antennas(values):
     :return: list of AntennaSource objects representing the list of antennas
     """
 
-    # hacking delays
     delay_map = parse_delays(values)
     antennas = [AntennaSource(mux) for mux in
                 vcraft.mux_by_antenna(values.files, delay_map)]
@@ -1012,7 +1019,7 @@ def get_antennas(values):
 
 
 def _main():
-    # TODO: (1, 2, 3, 4, 5)
+    # TODO: (2, 5)
     parser = ArgumentParser(description='Script description',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
@@ -1026,7 +1033,7 @@ def _main():
                              + 'default=1', default=1)
     parser.add_argument('-t','--num-threads', type=int,
                         help='Number of threads to run with', default=1)
-    parser.add_argument('--calcfile', help='Calc file for fringe rotation')
+    parser.add_argument('--calc_file', help='Calc file for fringe rotation')
     parser.add_argument('-w','--hwfile', help='Hw delay file')
     parser.add_argument('-p','--parset', help='Parset for delays')
     parser.add_argument('--show', help='Show plot', action='store_true',
