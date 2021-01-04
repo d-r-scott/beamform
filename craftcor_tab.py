@@ -4,22 +4,19 @@ Tied-array beamforming vcraft files, based on "craftcor.py".
 
 Copyright (C) CSIRO 2017
 """
-#import pylab
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import logging
+import multiprocessing
 import numpy as np
 import os
-import sys
-import logging
-import vcraft
-from calc11 import ResultsFile
-#from corruvfits import CorrUvFitsFile
-from astropy.coordinates import SkyCoord
-import multiprocessing
 import signal
 import time
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
+from astropy.coordinates import SkyCoord
+
+from calc11 import ResultsFile
 from miriad import MiriadGainSolutions
+import vcraft
 
 __author__ = "Keith Bannister <keith.bannister@csiro.au>"
 
