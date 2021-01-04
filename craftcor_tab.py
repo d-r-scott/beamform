@@ -30,19 +30,23 @@ F_OS = OS_NYQ_BWIDTH / CHAN_BWIDTH  # Oversampling factor
 NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH    # Number of guard channels
 
 # TODO: Cleanup (not in any particular order)
+#   IN GENERAL: MAKE THINGS CONSISTENT AND NICE!
 #   (1) PEP-008ify everything
 #         - Probably do first, easiest to do the others with readable code!
 #   (2) Document all functions and classes
 #         - Includes docstrings and line comments
 #   (3) Ensure only necessary functions remain
 #   (4) Remove magic numbers!
+#   (5) Make as much as possible compatible with Python 3
+
 
 def print_delay(xx):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (2, 3, 5)
     xxang = np.angle(xx)
     punwrap = np.unwrap(xxang)
     f = np.arange(len(punwrap)) - len(punwrap)/2
     gradient, phase = np.polyfit(f, punwrap, 1)
+
     '''
     pylab.figure(20)
     pylab.plot(f, xxang)
@@ -50,31 +54,39 @@ def print_delay(xx):
     pylab.plot(f, np.polyval((gradient, phase), f))
     pylab.show()
     '''
-    delay = gradient/2./np.pi*len(punwrap)
-    delayns = delay*27./32.*1e3*(54./len(punwrap))
-    print 'Unwrapped phase = {} rad = {} deg, gradient={} rad per channel, delay={}samples ={} ns nsamp={}' \
-        .format(phase, np.degrees(phase), gradient, delay, delay*27./32.*1e3, len(punwrap))
 
-    return (delay, np.degrees(phase))
+    delay = gradient / 2. / np.pi * len(punwrap)
+    delayns = delay / F_OS * 1e3 * (54./len(punwrap))
+
+    print('Unwrapped phase = {},\n'.format(phase)
+          + 'rad = {} deg,\n'.format(np.degrees(phase))
+          + 'gradient = {} rad per channel,\n'.format(gradient)
+          + 'delay = {},\n'.format(delay)
+          + 'samples = {} ns,\n'.format(delay / F_OS * 1e3)
+          + 'nsamp = {}'.format(len(punwrap)))
+
+    return delay, np.degrees(phase)
+
 
 class FitsOut(object):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     def __init__(self, fname, corr):
         ants = self.corr.ants
 
     def put_product(self, corr, a1, a2, xx):
         pass
 
+
 class PlotOut(object):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     def __init__(self, corr):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.stuff = []
         self.corr = corr
         self.delayout = open(corr.values.outfile.replace('.fits','')+'.delays.parset', 'w')
 
     def put_product(self, a1, a2, xxp):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         if self.corr.values.show:
             if a1 != a2:
                 xx= xxp[:,0]
@@ -84,7 +96,7 @@ class PlotOut(object):
                     self.plot_stuff(a1, a2)
 
     def plot_stuff(self, a1, a2):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         '''(a1, a2, xx) = self.last_xx
         fig, (ax1, ax2, ax3, ax4, ax5,ax6) = pylab.subplots(6,1)
         xxang = np.angle(xx)
@@ -127,16 +139,16 @@ class PlotOut(object):
         return # added by hyerin 
 
     def finish(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         stuff = np.array(self.stuff)
         #pylab.imshow(np.angle(stuff))
         #pylab.show()
 
 
 class AntennaSource(object):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     def __init__(self, vfile):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.vfile = vfile
         self.antname = self.vfile.hdr['ANT'][0].lower()
         self.antno = int(self.vfile.hdr['ANTENNA_NO'][0])
@@ -150,7 +162,7 @@ class AntennaSource(object):
         print 'antenna {} {}'.format(self.antname, self.vfile.freqconfig)
 
     def do_f(self, corr):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.frparams = FringeRotParams(corr, self)
         # calculate sample start
         framediff_samp = corr.refant.trigger_frame - self.trigger_frame
@@ -227,7 +239,7 @@ class AntennaSource(object):
             self.data[:, fcstart:fcend, 0] = xfguard
 
     def do_f_tab(self, corr, iant):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.frparams = FringeRotParams(corr, self)
         # calculate sample start
         framediff_samp = corr.refant.trigger_frame - self.trigger_frame
@@ -387,16 +399,16 @@ class AntennaSource(object):
 
             
     def get_data(self, chan, pol):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         return self.data[:, chan, pol]
 
 
 class FringeRotParams(object):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     cols = ('U (m)', 'V (m)', 'W (m)', 'DELAY (us)')
 
     def __init__(self, corr, ant):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         mid_data = corr.frdata_mid[ant.antname]
         self.u,self.v,self.w,self.delay = map(float, [mid_data[c] for c in FringeRotParams.cols])
         self.delay_start = float(corr.frdata_start[ant.antname]['DELAY (us)'])
@@ -406,16 +418,16 @@ class FringeRotParams(object):
         self.corr = corr
 
     def __str__(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         s = 'FR {} uvw=({},{},{}) m = {} us'.format(self.ant.antname, self.u, self.v, self.w, self.delay)
         return s
 
     __repr__ = __str__
 
 class Correlator(object):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     def __init__(self, ants, sources, values, abs_delay=0):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.running = True
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
@@ -478,11 +490,11 @@ class Correlator(object):
         logging.debug('F0 %f FINE CHANNEL %f kHz num=%d freqs=%s', self.f0, self.fine_chanbw*1e3, self.nfine_chan, self.freqs)
 
     def exit_gracefully(self, signum, frame):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.running = False
 
     def parse_parset(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.parset = {}
 
         # open the fcm file
@@ -497,21 +509,21 @@ class Correlator(object):
                 self.parset[name] = value
 
     def parse_mir(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         #self.mir = None
         #if self.values.mirsolutions is not None or self.values.aips_c is not None:
         self.mir = MiriadGainSolutions(self.values.mirsolutions,self.values.aips_c, self.pol, self.freqs)
                 
 
     def get_ant_location(self, antno):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         key = 'common.antenna.ant{}.location.itrf'.format(antno)
         value = self.parset[key]
         location = map(float, value.replace('[','').replace(']','').split(','))
         return location
 
     def get_fixed_delay_usec(self, antno):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         key = 'common.antenna.ant{}.delay'.format(antno)
         value = self.parset[key]
         delayns =  float(value.replace('ns',''))
@@ -521,7 +533,7 @@ class Correlator(object):
 
 
     def get_uvw(self, ant1, ant2):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         fr1 = FringeRotParams(self, ant1)
         fr2 = FringeRotParams(self, ant2)
         uvw = np.array([fr1.u - fr2.u, fr1.v - fr2.v, fr1.w - fr2.w]) / C_LIGHT
@@ -529,7 +541,7 @@ class Correlator(object):
         return uvw
 
     def get_geometric_delay_delayrate_us(self, ant):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         fr1 = FringeRotParams(self, ant)
         fr2 = FringeRotParams(self, self.refant)
 
@@ -551,7 +563,7 @@ class Correlator(object):
         return (delay, delayrate)
 
     def calcmjd(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         i = float(self.curr_intno)
         abs_delay_days = float(self.abs_delay)/86400./(self.fs*1e6)
         self.curr_mjd_start = self.mjd0 + self.inttime_days*(i + 0.0) + abs_delay_days
@@ -559,7 +571,7 @@ class Correlator(object):
         self.curr_mjd_end = self.mjd0 + self.inttime_days*(i + 1.0) + abs_delay_days
 
     def next_integration(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         #self.curr_intno +=
         self.curr_intno += 1
         self.curr_samp += self.nint
@@ -567,21 +579,21 @@ class Correlator(object):
         self.get_fr_data()
 
     def get_calc_results(self, mjd):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         #res = self.calcresults.scans[0].eval_src0_poly_delta(mjd, self.refant.antname.lower())
         res = self.calcresults.scans[0].eval_src0_poly(mjd)  # Calcresults is a ResultsFile
 
         return res
 
     def get_fr_data(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.frdata_start = self.get_calc_results(self.curr_mjd_start)
         self.frdata_mid = self.get_calc_results(self.curr_mjd_mid)
         self.frdata_end = self.get_calc_results(self.curr_mjd_end)
 
 
     def do_f(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         for iant, ant in enumerate(self.ants):
             if not self.running:
                 raise KeyboardInterrupt()
@@ -589,7 +601,7 @@ class Correlator(object):
             ant.do_f(self)
 
     def do_x(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         nant = len(self.ants)
         for ia1 in xrange(nant):
             for ia2 in xrange(ia1, nant):
@@ -601,7 +613,7 @@ class Correlator(object):
                 self.do_x_corr(a1, a2)
 
     def do_x_corr(self, a1, a2):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         npolout = self.npol_out
         xx = np.empty([self.nfine_chan, npolout], dtype=np.complex64)
         #np.seterr(all='raise')
@@ -640,7 +652,7 @@ class Correlator(object):
 
 
     def do_tab(self, an=None):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         # Tied-array beamforming
         
         nsamp = self.nint
@@ -674,7 +686,7 @@ class Correlator(object):
             return temp
     
     def put_product(self, a1, a2, xx):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         self.prodout.put_product(a1, a2, xx)
         uvw = self.get_uvw(a1, a2)
         #self.fileout.put_data(uvw, self.curr_mjd_mid, a1.ia, a2.ia,
@@ -683,7 +695,7 @@ class Correlator(object):
 
 
 def parse_delays(values):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     delayfile = values.calcfile.replace('.im','.hwdelays')
     if os.path.exists(delayfile)==False:
         delayfile = values.hwfile
@@ -710,7 +722,7 @@ def parse_delays(values):
     return delays
 
 def parse_gpplt(fin):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     ''' 
     Parse a miriad gpplt exported log file
 
@@ -750,7 +762,7 @@ def parse_gpplt(fin):
     return np.array(x), v
 
 class MiriadGainSolutions(object):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     def __init__(self, file_root, bp_c_root=None, pol=None, freqs=None):
         '''Loads gpplt exported bandpass and gain calibration solutions.
         Expects 4 files at the following names, produced by miriad gpplt
@@ -904,7 +916,7 @@ class MiriadGainSolutions(object):
 
 
     def get_solution(self, iant, time, freq_ghz):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         '''
         Get solution including time and bandpass
         iant - antenna index
@@ -927,7 +939,7 @@ class MiriadGainSolutions(object):
         return total_value
 
     def plot(self):
-        # TODO: (1, 2, 3, 4)
+        # TODO: (1, 2, 3, 4, 5)
         '''fig, ax = pylab.subplots(3,3)
         ax = ax.flatten()
         for i in xrange(min(9, self.nant)):
@@ -941,7 +953,7 @@ class MiriadGainSolutions(object):
         return #added by hyerin
 
 def load_sources(calcfile):
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     calc_input = calcfile.replace('.im','.calc')
     d = {}
     for line in open(calc_input, 'rU'):
@@ -968,7 +980,7 @@ def load_sources(calcfile):
 
 
 def _main():
-    # TODO: (1, 2, 3, 4)
+    # TODO: (1, 2, 3, 4, 5)
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     parser = ArgumentParser(description='Script description', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Be verbose')
