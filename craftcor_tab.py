@@ -994,12 +994,29 @@ def load_sources(calcfile):
     return sources
 
 
+def get_antennas(values):
+    """Calculate delays and return antennas
+
+    :param values: Command line input values
+    :return: list of AntennaSource objects representing the list of antennas
+    """
+
+    # hacking delays
+    delay_map = parse_delays(values)
+    antennas = [AntennaSource(mux) for mux in
+                vcraft.mux_by_antenna(values.files, delay_map)]
+
+    print('NUMBER OF ANTENNAS',len(antennas))
+
+    return antennas
+
+
 def _main():
     # TODO: (1, 2, 3, 4, 5)
     parser = ArgumentParser(description='Script description',
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                        help='Be verbose')
+                        help='Be verbose', default=True)
     parser.add_argument('-o','--outfile', help='Output fits/.npy file',
                         default='corr.fits')
     parser.add_argument('-c','--channel', type=int, help='Channel to plot',
@@ -1032,8 +1049,8 @@ def _main():
     parser.add_argument('--offset', type=int, help='FFT offset to add',
                         default=0)
     parser.add_argument(dest='files', nargs='+')
-    parser.set_defaults(verbose=False)
     values = parser.parse_args()
+
     if values.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
@@ -1041,12 +1058,7 @@ def _main():
 
     sources = load_sources(values.calcfile)
 
-    # hacking delays
-    delay_map = parse_delays(values)
-    antennas = [AntennaSource(mux) for mux in
-                vcraft.mux_by_antenna(values.files, delay_map)]
-
-    print('NUMBER OF ANTENNAS',len(antennas))
+    antennas = get_antennas(values)
 
     given_offset = values.offset
     corr = Correlator(antennas, sources, values, abs_delay=given_offset)
@@ -1058,12 +1070,11 @@ def _main():
         temp = corr.do_tab(values.an)
         fn = values.outfile
 
-        print('saving output to '+fn)
+        print('saving output to ' + fn)
 
         np.save(fn, temp)
     except Exception as e:
         print('ERROR OCCURRED')
-        print('craftcor_tab.py running time: ' + str(time.time() - t0))
         print(e)
     finally:
         print('craftcor_tab.py running time: ' + str(time.time() - t0))
