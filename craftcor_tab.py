@@ -19,6 +19,8 @@ import multiprocessing
 import signal
 import warnings
 from scipy.interpolate import interp1d
+import time
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 __author__ = "Keith Bannister <keith.bannister@csiro.au>"
 
@@ -128,10 +130,10 @@ class PlotOut(object):
         ax5.plot(phase_vt)
         ax6.imshow(abs(np.array(self.stuff)), aspect='auto')
         print 'Phase rate={} offset={} std={} deg lagoff={}samples = {}ns lag S/N={}'.format(rate, offset, fit_std, lagoff, lagns, lagsn)
-        fig.suptitle('a1 {} a2 {}'.format(a1.antname, a2.antname))
+        fig.suptitle('a1 {} a2 {}'.format(a1.ant_name, a2.ant_name))
         curr_delay = self.corr.get_fixed_delay_usec(a2.antno)*1e3
         if a1 != a2:
-            self.delayout.write('#{}={} S/N={} delay={}ns\n'.format(a1.antname, a2.antname, lagsn, lagns))
+            self.delayout.write('#{}={} S/N={} delay={}ns\n'.format(a1.ant_name, a2.ant_name, lagsn, lagns))
             self.delayout.write('common.antenna.ant{}.delay={}ns\n'.format(a2.antno, curr_delay+lagns))
             self.delayout.flush()
 
@@ -150,9 +152,9 @@ class AntennaSource(object):
     def __init__(self, vfile):
         # TODO: (1, 2, 3, 4, 5)
         self.vfile = vfile
-        self.antname = self.vfile.hdr['ANT'][0].lower()
+        self.ant_name = self.vfile.hdr['ANT'][0].lower()
         self.antno = int(self.vfile.hdr['ANTENNA_NO'][0])
-        self.mjdstart = self.vfile.start_mjd
+        self.mjd_start = self.vfile.start_mjd
         self.trigger_frame = self.vfile.start_frameid
         self.hdr = self.vfile.hdr
         self.init_geom_delay_us = None
@@ -160,7 +162,7 @@ class AntennaSource(object):
         self.all_mjds = []
         self.pol = self.vfile.pol.lower()
         self.fringe_rot_params = None
-        print 'antenna {} {}'.format(self.antname, self.vfile.freqconfig)
+        print('antenna {} {}'.format(self.ant_name, self.vfile.freqconfig))
 
     def do_f(self, corr):
         # TODO: (1, 2, 3, 4, 5)
@@ -191,13 +193,13 @@ class AntennaSource(object):
         # get data
         nsamp = corr.nint*corr.nfft
         logging.debug('F %s sample delays: frame: %f geo %f fixed %f total %f whole: %d frac: %f nsamp: %d phase=%f deg',
-            self.antname, framediff_samp, geom_delay_samp, fixed_delay_samp,
-            total_delay_samp, whole_delay, frac_delay_samp, nsamp,
-            360.*frac_delay_us*corr.f0)
+                      self.ant_name, framediff_samp, geom_delay_samp, fixed_delay_samp,
+                      total_delay_samp, whole_delay, frac_delay_samp, nsamp,
+                      360. * frac_delay_us * corr.f0)
         logging.debug('F %s us delays: frame: %f geo %f fixed %f total %f whole: %d frac: %f nsamp: %d phase=%f deg rate=%e',
-                self.antname, framediff_us, geom_delay_us, fixed_delay_us,
-                total_delay_us, whole_delay_us, frac_delay_us, nsamp,
-                      360.*frac_delay_us*corr.f0, geom_delay_rate_us)
+                      self.ant_name, framediff_us, geom_delay_us, fixed_delay_us,
+                      total_delay_us, whole_delay_us, frac_delay_us, nsamp,
+                      360. * frac_delay_us * corr.f0, geom_delay_rate_us)
 
         sampoff = corr.curr_samp*corr.nfft + whole_delay
         rawd = self.vfile.read(sampoff, nsamp)
@@ -219,7 +221,7 @@ class AntennaSource(object):
             delta_t = -fixed_delay_us + geom_delay_us
             phases = delta_t * (freqs + cfreq)
             logging.debug('PHASOR %s[%s] chan=%s freq=%sfixed=%f us geom=%f us delta_t %s us coff*fixed = %f deg coff*geom = %f deg',
-                          self.antname, self.ia, c, cfreq, fixed_delay_us, geom_delay_us, delta_t, cfreq*fixed_delay_us*360., cfreq*geom_delay_us*360.)
+                          self.ant_name, self.ia, c, cfreq, fixed_delay_us, geom_delay_us, delta_t, cfreq * fixed_delay_us * 360., cfreq * geom_delay_us * 360.)
 
 
             # If you plot the phases you're about to correct, after adding a artificial
@@ -304,7 +306,7 @@ class AntennaSource(object):
         print(base_str.format('frac_delay_us', frac_delay_us))
         print('')
 
-        print("antenna #: ", i_ant, self.antname)
+        print("antenna #: ", i_ant, self.ant_name)
         sample_offset = whole_delay + corr.abs_delay
         frameid = self.vfile.start_frameid + sample_offset
         print('FRAMEID: '
@@ -322,7 +324,6 @@ class AntennaSource(object):
         assert raw_data.shape == (n_samp, corr.ncoarse_chan),\
             'Unexpected shape from vfile: {} expected ({},{})'.format(
                 raw_data.shape, n_samp, corr.ncoarse_chan)
-
 
         turn_fracs = np.zeros((336, n_fine+1))
 
@@ -413,7 +414,6 @@ class AntennaSource(object):
         np.save('delays/turn_fracs_{}'.format(i_ant), turn_fracs)
 
         return data_out
-
             
     def get_data(self, chan, pol):
         # TODO: (1, 2, 3, 4, 5)
@@ -426,17 +426,17 @@ class FringeRotParams(object):
 
     def __init__(self, corr, ant):
         # TODO: (1, 2, 3, 4, 5)
-        mid_data = corr.frdata_mid[ant.antname]
+        mid_data = corr.frdata_mid[ant.ant_name]
         self.u,self.v,self.w,self.delay = map(float, [mid_data[c] for c in FringeRotParams.cols])
-        self.delay_start = float(corr.frdata_start[ant.antname]['DELAY (us)'])
-        self.delay_end = float(corr.frdata_end[ant.antname]['DELAY (us)'])
+        self.delay_start = float(corr.frdata_start[ant.ant_name]['DELAY (us)'])
+        self.delay_end = float(corr.frdata_end[ant.ant_name]['DELAY (us)'])
         self.delay_rate = (self.delay_end - self.delay_start)/float(corr.nint)
         self.ant = ant
         self.corr = corr
 
     def __str__(self):
         # TODO: (1, 2, 3, 4, 5)
-        s = 'FR {} uvw=({},{},{}) m = {} us'.format(self.ant.antname, self.u, self.v, self.w, self.delay)
+        s = 'FR {} uvw=({},{},{}) m = {} us'.format(self.ant.ant_name, self.u, self.v, self.w, self.delay)
         return s
 
     __repr__ = __str__
@@ -463,11 +463,11 @@ class Correlator(object):
 
         refantname = self.parset['cp.ingest.tasks.FringeRotationTask.params.refant'].lower()
         self.abs_delay = abs_delay
-        #self.refant = filter(lambda a:a.antname == refantname, ants)[0]
+        #self.refant = filter(lambda a:a.ant_name == refantname, ants)[0]
         self.refant = ants[0]
         self.calcresults = ResultsFile(values.calcfile)
         self.dutc = 0
-        self.mjd0 = self.refant.mjdstart + self.dutc/86400.0
+        self.mjd0 = self.refant.mjd_start + self.dutc / 86400.0
         self.frame0 = self.refant.trigger_frame
         self.nint = values.nint
         self.nfft = 64*values.fft_size
@@ -531,7 +531,6 @@ class Correlator(object):
         #self.mir = None
         #if self.values.mirsolutions is not None or self.values.aips_c is not None:
         self.mir = MiriadGainSolutions(self.values.mirsolutions,self.values.aips_c, self.pol, self.freqs)
-                
 
     def get_ant_location(self, antno):
         # TODO: (1, 2, 3, 4, 5)
@@ -548,7 +547,6 @@ class Correlator(object):
         delayus = delayns/1e3
 
         return delayus
-
 
     def get_uvw(self, ant1, ant2):
         # TODO: (1, 2, 3, 4, 5)
@@ -598,7 +596,7 @@ class Correlator(object):
 
     def get_calc_results(self, mjd):
         # TODO: (1, 2, 3, 4, 5)
-        #res = self.calcresults.scans[0].eval_src0_poly_delta(mjd, self.refant.antname.lower())
+        #res = self.calcresults.scans[0].eval_src0_poly_delta(mjd, self.refant.ant_name.lower())
         res = self.calcresults.scans[0].eval_src0_poly(mjd)  # Calcresults is a ResultsFile
 
         return res
@@ -659,7 +657,6 @@ class Correlator(object):
                     import ipdb
                     ipdb.set_trace()
 
-
         if self.fscrunch > 1:
             chans = np.arange(self.nfine_chan, step=self.fscrunch)
             xx = np.add.reduceat(xx, chans, axis=0)/float(self.fscrunch)
@@ -667,7 +664,6 @@ class Correlator(object):
         assert xx.shape == (self.nfine_out_chan, self.npol_out)
             
         self.put_product(a1, a2, xx)
-
 
     def do_tab(self, an=None):
         # TODO: (1, 2, 3, 4, 5)
@@ -711,7 +707,6 @@ class Correlator(object):
             #self.inttime_secs, xx)
 
 
-
 def parse_delays(values):
     # TODO: (1, 2, 3, 4, 5)
     delayfile = values.calcfile.replace('.im','.hwdelays')
@@ -738,6 +733,7 @@ def parse_delays(values):
     
 
     return delays
+
 
 def parse_gpplt(fin):
     # TODO: (1, 2, 3, 4, 5)
@@ -778,6 +774,7 @@ def parse_gpplt(fin):
         assert v.ndim == 2
 
     return np.array(x), v
+
 
 class MiriadGainSolutions(object):
     # TODO: (1, 2, 3, 4, 5)
@@ -970,6 +967,7 @@ class MiriadGainSolutions(object):
            '''
         return #added by hyerin
 
+
 def load_sources(calcfile):
     # TODO: (1, 2, 3, 4, 5)
     calc_input = calcfile.replace('.im','.calc')
@@ -996,29 +994,43 @@ def load_sources(calcfile):
     return sources
 
 
-
 def _main():
     # TODO: (1, 2, 3, 4, 5)
-    from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-    parser = ArgumentParser(description='Script description', formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Be verbose')
-    parser.add_argument('-o','--outfile', help='Output fits/.npy file', default='corr.fits')
-    parser.add_argument('-c','--channel', type=int, help='Channel to plot', default=0)
-    parser.add_argument('-n','--fft-size', type=int, help='Multiple of 64 channels to make channels- default=1', default=1)
-    parser.add_argument('-t','--num-threads', type=int, help='Number of threads to run with', default=1)
+    parser = ArgumentParser(description='Script description',
+                            formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                        help='Be verbose')
+    parser.add_argument('-o','--outfile', help='Output fits/.npy file',
+                        default='corr.fits')
+    parser.add_argument('-c','--channel', type=int, help='Channel to plot',
+                        default=0)
+    parser.add_argument('-n','--fft-size', type=int,
+                        help='Multiple of 64 channels to make channels - '
+                             + 'default=1', default=1)
+    parser.add_argument('-t','--num-threads', type=int,
+                        help='Number of threads to run with', default=1)
     parser.add_argument('--calcfile', help='Calc file for fringe rotation')
     parser.add_argument('-w','--hwfile', help='Hw delay file')
     parser.add_argument('-p','--parset', help='Parset for delays')
-    parser.add_argument('--show', help='Show plot', action='store_true', default=False)
-    parser.add_argument('-i','--nint', help='Number of fine spectra to average', type=int, default=128)
-    parser.add_argument('-f','--fscrunch', help='Frequency average by this factor', default=1, type=int)
-    parser.add_argument('--rfidelay', type=int, help='Delay in fine samples to add to second component to make an RFI data set', default=0)
-    parser.add_argument('--mirsolutions', help='Root file name for miriad gain solutions')
-    parser.add_argument('--aips_c', help='AIPS banpass polynomial fit coeffs',default=None)
-    parser.add_argument('--an', type=int, help='Specific antenna', default=None)
-    parser.add_argument('--offset', type=int, help='FFT offset to add', default=0)
-    parser.add_argument('--tab', help='Do tied-array beamforming', action='store_true', default=False)
-    parser.add_argument('--ics', help='Do incoherent beamforming', action='store_true', default=False)
+    parser.add_argument('--show', help='Show plot', action='store_true',
+                        default=False)
+    parser.add_argument('-i','--nint',
+                        help='Number of fine spectra to average', type=int,
+                        default=128)
+    parser.add_argument('-f','--fscrunch',
+                        help='Frequency average by this factor', default=1,
+                        type=int)
+    parser.add_argument('--rfidelay', type=int,
+                        help='Delay in fine samples to add to second component'
+                             + ' to make an RFI data set', default=0)
+    parser.add_argument('--mirsolutions',
+                        help='Root file name for miriad gain solutions')
+    parser.add_argument('--aips_c', help='AIPS bandpass polynomial fit coeffs',
+                        default=None)
+    parser.add_argument('--an', type=int, help='Specific antenna',
+                        default=None)
+    parser.add_argument('--offset', type=int, help='FFT offset to add',
+                        default=0)
     parser.add_argument(dest='files', nargs='+')
     parser.set_defaults(verbose=False)
     values = parser.parse_args()
@@ -1027,55 +1039,35 @@ def _main():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    calcresults = ResultsFile(values.calcfile)
     sources = load_sources(values.calcfile)
-    #solutions = None
-    #import pdb
-    #pdb.set_trace()
-    if 0:#values.mirsolutions is not None:
-        solutions = MiriadGainSolutions(values.mirsolutions, values.aips_c, 'y')
-        if 0:
-            solutions.plot()
-            pylab.show()
-        
+
     # hacking delays
-    delaymap = parse_delays(values)
-    antennas = [AntennaSource(mux) for mux in vcraft.mux_by_antenna(values.files, delaymap)]
+    delay_map = parse_delays(values)
+    antennas = [AntennaSource(mux) for mux in
+                vcraft.mux_by_antenna(values.files, delay_map)]
+
     print('NUMBER OF ANTENNAS',len(antennas))
-    #antennas = [AntennaSource(vcraft.VcraftFile(f)) for f in values.files]
+
     given_offset = values.offset
     corr = Correlator(antennas, sources, values, abs_delay=given_offset)
+
+    t0 = time.time()
     try:
-        if values.tab or values.ics:
-            import time
-            t0 = time.time()
-            if values.tab and values.ics:
-                print('Confused...you chose both tab and ics. PERFORMING TAB')
-            elif values.tab:
-                print('PERFORMING TIED-ARRAY BEAMFORMING')
-            else:
-                print('PERFORMING INCOHERENT BEAMFORMING')
-            temp = corr.do_tab(values.an)
-            fn = values.outfile
-            print('saving output to '+fn)
-            np.save(fn,temp)
-        else:
-            print('PERFORMING CORRELATION')
-            while(corr.running):
-                #fq = corr.fileout.fq_table()
-                #an = corr.fileout.an_table(corr.ants)
-                #su = corr.fileout.su_table(sources)
-                corr.do_f()
-                corr.do_x()
-                corr.next_integration()
+        print('PERFORMING TIED-ARRAY BEAMFORMING')
+
+        temp = corr.do_tab(values.an)
+        fn = values.outfile
+
+        print('saving output to '+fn)
+
+        np.save(fn, temp)
+    except Exception as e:
+        print('ERROR OCCURRED')
+        print('craftcor_tab.py running time: ' + str(time.time() - t0))
+        print(e)
     finally:
-        if values.tab:
-            print('craftcor.py running time: '+str(time.time()-t0))
-            print('done')
-        else:
-            corr.fileout.close()
-
-
+        print('craftcor_tab.py running time: ' + str(time.time() - t0))
+        print('done')
 
 
 if __name__ == '__main__':
