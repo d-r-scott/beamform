@@ -606,43 +606,6 @@ class Correlator(object):
 
             ant.do_f(self)
 
-    def do_x_corr(self, a1, a2):
-        # TODO: (1, 2, 3, 4, 5)
-        npolout = self.npol_out
-        xx = np.empty([self.nfine_chan, npolout], dtype=np.complex64)
-        #np.seterr(all='raise')
-        rfidelay = self.values.rfidelay
-        for p1 in xrange(self.npol_in):
-            for p2 in xrange(self.npol_in):
-                d1 = a1.data[:, :, p1]
-                d2 = a2.data[:, :, p2]
-                pout = p2 + p1*self.npol_in
-                ntimesi = d1.shape[0] - rfidelay
-                ntimes = float(ntimesi)
-
-                try:
-                    for c in xrange(self.nfine_chan):
-                        #xx[:,pout] = (d1 * np.conj(d2)).mean(axis=0)
-                        # vdot conjugates the first argument
-                        # this is equivalent to (d1 * conj(d2)).mean(axis=0)
-                        if self.sideband == -1:
-                            xx[c, pout] = np.vdot(d2[:ntimesi, c], d1[rfidelay:, c])/ntimes
-                        else:# take complex conjugate if inverted
-                            xx[c, pout] = np.vdot(d1[:ntimesi, c], d2[rfidelay:, c])/ntimes
-                            
-                except Exception, e:
-                    print 'Error', e
-                    import ipdb
-                    ipdb.set_trace()
-
-        if self.fscrunch > 1:
-            chans = np.arange(self.nfine_chan, step=self.fscrunch)
-            xx = np.add.reduceat(xx, chans, axis=0)/float(self.fscrunch)
-
-        assert xx.shape == (self.nfine_out_chan, self.npol_out)
-            
-        self.put_product(a1, a2, xx)
-
     def do_tab(self, an=None):
         # TODO: (1, 2, 3, 4, 5)
         # Tied-array beamforming
