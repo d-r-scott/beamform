@@ -469,14 +469,6 @@ class Correlator(object):
 
         return delayus
 
-    def get_uvw(self, ant1, ant2):
-        # TODO: (1, 2, 3, 4, 5)
-        fr1 = FringeRotParams(self, ant1)
-        fr2 = FringeRotParams(self, ant2)
-        uvw = np.array([fr1.u - fr2.u, fr1.v - fr2.v, fr1.w - fr2.w]) / C_LIGHT
-
-        return uvw
-
     def get_geometric_delay_delayrate_us(self, ant):
         # TODO: (1, 2, 3, 4, 5)
         fr1 = FringeRotParams(self, ant)
