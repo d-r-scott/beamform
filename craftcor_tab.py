@@ -606,18 +606,6 @@ class Correlator(object):
 
             ant.do_f(self)
 
-    def do_x(self):
-        # TODO: (1, 2, 3, 4, 5)
-        nant = len(self.ants)
-        for ia1 in xrange(nant):
-            for ia2 in xrange(ia1, nant):
-                if not self.running:
-                    raise KeyboardInterrupt()
-                    
-                a1 = self.ants[ia1]
-                a2 = self.ants[ia2]
-                self.do_x_corr(a1, a2)
-
     def do_x_corr(self, a1, a2):
         # TODO: (1, 2, 3, 4, 5)
         npolout = self.npol_out
