@@ -512,15 +512,6 @@ class Correlator(object):
         self.frdata_mid = self.get_calc_results(self.curr_mjd_mid)
         self.frdata_end = self.get_calc_results(self.curr_mjd_end)
 
-
-    def do_f(self):
-        # TODO: (1, 2, 3, 4, 5)
-        for iant, ant in enumerate(self.ants):
-            if not self.running:
-                raise KeyboardInterrupt()
-
-            ant.do_f(self)
-
     def do_tab(self, an=None):
         # TODO: (1, 2, 3, 4, 5)
         # Tied-array beamforming
