@@ -259,10 +259,6 @@ class AntennaSource(object):
         np.save('delays/turn_fracs_{}'.format(i_ant), turn_fracs)
 
         return data_out
-            
-    def get_data(self, chan, pol):
-        # TODO: (1, 2, 3, 4, 5)
-        return self.data[:, chan, pol]
 
 
 class FringeRotParams(object):
