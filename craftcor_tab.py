@@ -67,7 +67,7 @@ class AntennaSource(object):
         self.fringe_rot_params = FringeRotParams(corr, self)
 
         # calculate sample start
-        framediff_samp = corr.refant.trigger_frame - self.trigger_frame
+        framediff_samp = corr.ref_ant.trigger_frame - self.trigger_frame
         framediff_us = framediff_samp / corr.fs
 
         geom_delay_us, geom_delay_rate_us = \
@@ -86,11 +86,11 @@ class AntennaSource(object):
         frac_delay_samp = total_delay_samp - whole_delay
         frac_delay_us = frac_delay_samp * corr.fs
 
-        data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in),
+        data_out = np.zeros((corr.n_int, corr.n_fine_chan, corr.n_pol_in),
                             dtype=np.complex64)
-        n_fine = corr.nfft - 2*corr.nguard_chan
+        n_fine = corr.n_fft - 2 * corr.nguard_chan
 
-        n_samp = corr.nint * corr.nfft
+        n_samp = corr.n_int * corr.n_fft
 
         # time-dependent geometric delays
         # np.linspace(0, 1, n_samp) == time in units of integrations
@@ -151,7 +151,7 @@ class AntennaSource(object):
             More appropriately named Delta_f?
             Goes from -0.5 to 0.5
             '''
-            delta_freq = (corr.fine_chanbw
+            delta_freq = (corr.fine_chan_bwidth
                           * (np.arange(n_fine, dtype=np.float)
                           - float(n_fine)/2.0))
 
@@ -163,7 +163,7 @@ class AntennaSource(object):
             raw_data's shape: (n_samp, corr.ncoarse_chan)
             n_samp = input.i * (64 * input.n)
             '''
-            x1 = raw_data[:, chan].reshape(-1, corr.nfft)
+            x1 = raw_data[:, chan].reshape(-1, corr.n_fft)
 
             '''
             fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
@@ -236,11 +236,11 @@ class FringeRotParams(object):
 
     def __init__(self, corr, ant):
         # TODO: (1, 2, 4, 5)
-        mid_data = corr.frdata_mid[ant.ant_name]
+        mid_data = corr.fringe_rot_data_mid[ant.ant_name]
         self.u,self.v,self.w,self.delay = map(float, [mid_data[c] for c in FringeRotParams.cols])
-        self.delay_start = float(corr.frdata_start[ant.ant_name]['DELAY (us)'])
-        self.delay_end = float(corr.frdata_end[ant.ant_name]['DELAY (us)'])
-        self.delay_rate = (self.delay_end - self.delay_start)/float(corr.nint)
+        self.delay_start = float(corr.fringe_rot_data_start[ant.ant_name]['DELAY (us)'])
+        self.delay_end = float(corr.fringe_rot_data_end[ant.ant_name]['DELAY (us)'])
+        self.delay_rate = (self.delay_end - self.delay_start)/float(corr.n_int)
         self.ant = ant
         self.corr = corr
 
@@ -265,67 +265,76 @@ class Correlator(object):
         if self.values.num_threads > 1:
             self.pool = multiprocessing.Pool(processes=values.num_threads)
 
-        self.parse_parset()
+        self.parse_par_set()
 
         for ia, a in enumerate(self.ants):
             a.ia = ia
             a.antpos = self.get_ant_location(a.antno)
 
-        refantname = self.parset['cp.ingest.tasks.FringeRotationTask.params.refant'].lower()
         self.abs_delay = abs_delay
-        #self.refant = filter(lambda a:a.ant_name == refantname, ants)[0]
-        self.refant = ants[0]
-        self.calcresults = ResultsFile(values.calcfile)
-        self.dutc = 0
-        self.mjd0 = self.refant.mjd_start + self.dutc / 86400.0
-        self.frame0 = self.refant.trigger_frame
-        self.nint = values.nint
-        self.nfft = 64*values.fft_size
-        self.nguard_chan = 5*values.fft_size
-        self.oversamp = 32./27.
-        self.fs = self.oversamp # samples per microsecnd
-        self.ncoarse_chan = len(self.refant.vfile.freqs)
+        self.ref_ant = ants[0]
+        self.calc_results = ResultsFile(values.calcfile)
+        self.d_utc = 0
+        self.mjd0 = self.ref_ant.mjd_start + self.d_utc / 86400.0
+        self.frame0 = self.ref_ant.trigger_frame
+        self.n_int = values.n_int
+        self.n_fft = 64 * values.fft_size
+        self.nguard_chan = NUM_GUARD_CHAN * values.fft_size
+        self.oversamp = F_OS
+        self.fs = self.oversamp     # samples per microsecond
+        self.ncoarse_chan = len(self.ref_ant.vfile.freqs)
         self.sideband = -1
-        self.coarse_chanbw = 1.0
-        self.nfine_per_coarse = self.nfft - 2*self.nguard_chan
-        self.nfine_chan = self.ncoarse_chan*self.nfine_per_coarse
-        self.fine_chanbw = self.coarse_chanbw / float(self.nfine_per_coarse)
-        self.full_bw = self.fine_chanbw * self.nfine_chan
-        self.fscrunch = values.fscrunch
-        assert self.fscrunch >= 1
-        assert self.nfine_per_coarse % self.fscrunch == 0, 'Fsrunch must yield an integer number of fine channels per coarse channel'
-        self.nfine_out_per_coarse = self.nfine_per_coarse / self.fscrunch
-        self.nfine_out_chan = self.nfine_out_per_coarse*self.ncoarse_chan
-        self.out_chanbw = self.coarse_chanbw / float(self.nfine_out_per_coarse)
-        self.npol_in = 1
-        self.npol_out = 1
-        #self.f0 = self.ants[0].vfile.freqs.mean() # centre frequency for fringe rotation
+        self.coarse_chan_bwidth = 1.0
+        self.n_fine_per_coarse = self.n_fft - 2 * self.nguard_chan
+        self.n_fine_chan = self.ncoarse_chan * self.n_fine_per_coarse
+        self.fine_chan_bwidth = (self.coarse_chan_bwidth
+                                 / float(self.n_fine_per_coarse))
+        self.full_bw = self.fine_chan_bwidth * self.n_fine_chan
+        self.freq_scrunch = values.freq_scrunch
+        assert self.freq_scrunch >= 1
+        assert self.n_fine_per_coarse % self.freq_scrunch == 0, \
+            'Freq scrunch must yield an integer number of fine channels ' \
+            'per coarse channel'
+        self.n_fine_out_per_coarse = self.n_fine_per_coarse / self.freq_scrunch
+        self.n_fine_out_chan = self.n_fine_out_per_coarse * self.ncoarse_chan
+        self.out_chan_bwidth = (self.coarse_chan_bwidth
+                                / float(self.n_fine_out_per_coarse))
+        self.n_pol_in = 1
+        self.n_pol_out = 1
         self.f0 = self.ants[0].vfile.freqs[0]
         self.freqs = self.ants[0].vfile.freqs
-        self.fmid = self.freqs.mean()
-        self.inttime_secs = float(self.nint*self.nfft)/(self.fs*1e6)
-        self.inttime_days = self.inttime_secs/86400.
-        self.curr_intno = 0
-        self.curr_samp = self.curr_intno*self.nint + 1000
-        self.calcmjd()
-        self.get_fr_data()
+        self.freq_mid = self.freqs.mean()
+        self.int_time_secs = float(self.n_int * self.n_fft) / (self.fs * 1e6)
+        self.int_time_days = self.int_time_secs / 86400.
+        self.curr_int_no = 0
+        self.curr_samp = self.curr_int_no * self.n_int + 1000
+        self.calc_mjd()
+        self.get_fringe_rot_data()
         self.pol = self.ants[0].pol
         self.parse_mir()
-        #self.fileout = CorrUvFitsFile(values.outfile, self.fmid, self.sideband*self.out_chanbw, \
-                                      #self.nfine_out_chan, self.npol_out, self.mjd0, sources, ants, self.sideband)
+        self.par_set = None
+        self.mir = None
+        self.curr_mjd_start = None
+        self.curr_mjd_mid = None
+        self.curr_mjd_end = None
+        self.fringe_rot_data_start = None
+        self.fringe_rot_data_mid = None
+        self.fringe_rot_data_end = None
 
-        logging.debug('F0 %f FINE CHANNEL %f kHz num=%d freqs=%s', self.f0, self.fine_chanbw*1e3, self.nfine_chan, self.freqs)
+        logging.debug('F0 %f FINE CHANNEL %f kHz num=%d freqs=%s', self.f0,
+                      self.fine_chan_bwidth * 1e3, self.n_fine_chan,
+                      self.freqs)
 
     def exit_gracefully(self, signum, frame):
         # TODO: (1, 2, 4, 5)
         self.running = False
 
-    def parse_parset(self):
+    def parse_par_set(self):
         # TODO: (1, 2, 4, 5)
-        self.parset = {}
+        self.par_set = {}
 
         # open the fcm file
-        with open(self.values.parset, 'rU') as f:
+        with open(self.values.par_set, 'rU') as f:
             for line in f:
                 if '=' not in line or line.startswith('#'):
                     continue
@@ -333,84 +342,86 @@ class Correlator(object):
                 name, value = line.strip().split('=')
                 name = name.strip()
                 value = value.strip()
-                self.parset[name] = value
+                self.par_set[name] = value
 
     def parse_mir(self):
         # TODO: (1, 2, 4, 5)
-        #self.mir = None
-        #if self.values.mirsolutions is not None or self.values.aips_c is not None:
-        self.mir = MiriadGainSolutions(self.values.mirsolutions,self.values.aips_c, self.pol, self.freqs)
+        self.mir = MiriadGainSolutions(self.values.mirsolutions,
+                                       self.values.aips_c, self.pol,
+                                       self.freqs)
 
     def get_ant_location(self, antno):
         # TODO: (1, 2, 4, 5)
         key = 'common.antenna.ant{}.location.itrf'.format(antno)
-        value = self.parset[key]
-        location = map(float, value.replace('[','').replace(']','').split(','))
+        value = self.par_set[key]
+        location = map(float,
+                       value.replace('[', '').replace(']', '').split(','))
         return location
 
     def get_fixed_delay_usec(self, antno):
         # TODO: (1, 2, 4, 5)
         key = 'common.antenna.ant{}.delay'.format(antno)
-        value = self.parset[key]
-        delayns =  float(value.replace('ns',''))
-        delayus = delayns/1e3
+        value = self.par_set[key]
+        delay_ns = float(value.replace('ns', ''))
+        delay_us = delay_ns / 1e3
 
-        return delayus
+        return delay_us
 
     def get_geometric_delay_delayrate_us(self, ant):
         # TODO: (1, 2, 4, 5)
         fr1 = FringeRotParams(self, ant)
-        fr2 = FringeRotParams(self, self.refant)
+        fr2 = FringeRotParams(self, self.ref_ant)
 
-        # TODO: There is a discrepancy here, below comment says fr1 is ref ant, but above suggests fr2 is?
+        # TODO: There is a discrepancy here, below comment says fr1 is
+        #       ref ant, but above suggests fr2 is?
         # fr1: reference antenna
         # Account for effects of Earth's rotation
-        #delay = fr1.delay - fr2.delay
-        #delayrate = fr1.delay_rate - fr2.delay_rate
         delay = fr1.delay_start - fr2.delay_start
         delayrate = fr1.delay_rate - fr2.delay_rate
 
         with open('delays/{}_ant_delays.dat'.format(ant.antno), 'w') as f:
-            f.write('#field fr1({}) fr2({})\n'.format(ant, self.refant))
-            f.write('delay_start {} {}\n'.format(fr1.delay_start, fr2.delay_start))
+            f.write('#field fr1({}) fr2({})\n'.format(ant, self.ref_ant))
+            f.write('delay_start {} {}\n'.format(fr1.delay_start,
+                                                 fr2.delay_start))
             f.write('delay {} {}\n'.format(fr1.delay, fr2.delay))
             f.write('delay_end {} {}\n'.format(fr1.delay_end, fr2.delay_end))
-            f.write('delay_rate {} {}\n'.format(fr1.delay_rate, fr2.delay_rate))
+            f.write('delay_rate {} {}\n'.format(fr1.delay_rate,
+                                                fr2.delay_rate))
 
-        return (delay, delayrate)
+        return delay, delayrate
 
-    def calcmjd(self):
+    def calc_mjd(self):
         # TODO: (1, 2, 4, 5)
-        i = float(self.curr_intno)
+        i = float(self.curr_int_no)
         abs_delay_days = float(self.abs_delay)/86400./(self.fs*1e6)
-        self.curr_mjd_start = self.mjd0 + self.inttime_days*(i + 0.0) + abs_delay_days
-        self.curr_mjd_mid = self.mjd0 + self.inttime_days*(i + 0.5) + abs_delay_days
-        self.curr_mjd_end = self.mjd0 + self.inttime_days*(i + 1.0) + abs_delay_days
+        self.curr_mjd_start = self.mjd0 + self.int_time_days * (i + 0.0) + abs_delay_days
+        self.curr_mjd_mid = self.mjd0 + self.int_time_days * (i + 0.5) + abs_delay_days
+        self.curr_mjd_end = self.mjd0 + self.int_time_days * (i + 1.0) + abs_delay_days
 
     def get_calc_results(self, mjd):
         # TODO: (1, 2, 4, 5)
-        #res = self.calcresults.scans[0].eval_src0_poly_delta(mjd, self.refant.ant_name.lower())
-        res = self.calcresults.scans[0].eval_src0_poly(mjd)  # Calcresults is a ResultsFile
+        res = self.calc_results.scans[0].eval_src0_poly(mjd)
 
         return res
 
-    def get_fr_data(self):
+    def get_fringe_rot_data(self):
         # TODO: (1, 2, 4, 5)
-        self.frdata_start = self.get_calc_results(self.curr_mjd_start)
-        self.frdata_mid = self.get_calc_results(self.curr_mjd_mid)
-        self.frdata_end = self.get_calc_results(self.curr_mjd_end)
+        self.fringe_rot_data_start = self.get_calc_results(self.curr_mjd_start)
+        self.fringe_rot_data_mid = self.get_calc_results(self.curr_mjd_mid)
+        self.fringe_rot_data_end = self.get_calc_results(self.curr_mjd_end)
 
     def do_tab(self, an=None):
         # TODO: (1, 2, 4, 5)
         # Tied-array beamforming
         
-        nsamp = self.nint
-        nchan = self.ncoarse_chan*self.nfine_per_coarse
+        n_samp = self.n_int
+        n_chan = self.ncoarse_chan*self.n_fine_per_coarse
             
-        sum_aligned = np.zeros((nsamp, nchan, self.npol_in), dtype=np.complex64)
+        sum_aligned = np.zeros((n_samp, n_chan, self.n_pol_in),
+                               dtype=np.complex64)
         
         if an == None: # add all antennas
-            print('## Summing up all '+str(len(self.ants))+' antennas')
+            print('## Summing up all ' + str(len(self.ants)) + ' antennas')
             if self.values.tab:
                 print('coherent sum')
             else:
@@ -419,46 +430,46 @@ class Correlator(object):
                 if not self.running:
                     raise KeyboardInterrupt()
             
-                temp = ant.do_f_tab(self,iant)
+                temp = ant.do_f_tab(self, iant)
                 
                 if self.values.tab:
                     sum_aligned += temp
                 else:
-                    sum_aligned += np.power(abs(temp),2)
+                    sum_aligned += np.power(abs(temp), 2)
 
             return sum_aligned
         else:
-            print('## Operate on only antenna #: '+str(an))
+            print('## Operate on only antenna #: ' + str(an))
             ant = self.ants[an]
             iant = an
-            temp = ant.do_f_tab(self,iant)
+            temp = ant.do_f_tab(self, iant)
             return temp
     
 
 def parse_delays(values):
-    # TODO: (1, 2, 3, 4, 5)
-    delayfile = values.calcfile.replace('.im','.hwdelays')
-    if os.path.exists(delayfile)==False:
-        delayfile = values.hwfile
-    #print(delayfile)
+    # TODO: (2, 4, 5)
+    delay_file = values.calcfile.replace('.im', '.hwdelays')
+
+    if os.path.exists(delay_file) is False:
+        delay_file = values.hwfile
+
     delays = {}
-    if delayfile is not None and os.path.exists(delayfile):
-        with open(delayfile, 'rU') as dfile:
+    if delay_file is not None and os.path.exists(delay_file):
+        with open(delay_file, 'rU') as dfile:
             for line in dfile:
                 bits = line.split()
                 if not line.startswith('#') and len(bits) == 2:
                     raw = -int(bits[1])
-                    if raw % 8 !=0: # if it is not a multiple of 8, round
+                    if raw % 8 != 0:    # if it is not a multiple of 8, round
                         new = int(8 * round(float(raw)/8))
-                        print('hwdelay ',raw,' rounded to ',new)
+                        print('hwdelay ', raw, ' rounded to ', new)
                         delays[bits[0].strip()] = new
                     else:
                         delays[bits[0].strip()] = raw
 
-        logging.info('Loaded %s delays from %s', len(delays), delayfile)
+        logging.info('Loaded %s delays from %s', len(delays), delay_file)
     else:
-        logging.info('No delays loaded. %s does not exist', delayfile)
-    
+        logging.info('No delays loaded. %s does not exist', delay_file)
 
     return delays
 
@@ -492,7 +503,7 @@ def load_sources(calc_file):
     ra = float(d['SOURCE 0 RA'])
     dec = float(d['SOURCE 0 DEC'])
     pos = SkyCoord(ra, dec, unit=('rad', 'rad'), frame='icrs')
-    sources = [{'name' : name, 'ra' : pos.ra.deg, 'dec' : pos.dec.deg}]
+    sources = [{'name': name, 'ra': pos.ra.deg, 'dec': pos.dec.deg}]
 
     return sources
 
@@ -508,7 +519,7 @@ def get_antennas(values):
     antennas = [AntennaSource(mux) for mux in
                 vcraft.mux_by_antenna(values.files, delay_map)]
 
-    print('NUMBER OF ANTENNAS',len(antennas))
+    print('NUMBER OF ANTENNAS', len(antennas))
 
     return antennas
 
@@ -519,24 +530,24 @@ def _main():
                             formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                         help='Be verbose', default=True)
-    parser.add_argument('-o','--outfile', help='Output fits/.npy file',
+    parser.add_argument('-o', '--outfile', help='Output fits/.npy file',
                         default='corr.fits')
-    parser.add_argument('-c','--channel', type=int, help='Channel to plot',
+    parser.add_argument('-c', '--channel', type=int, help='Channel to plot',
                         default=0)
-    parser.add_argument('-n','--fft-size', type=int,
+    parser.add_argument('-n', '--fft-size', type=int,
                         help='Multiple of 64 channels to make channels - '
                              + 'default=1', default=1)
-    parser.add_argument('-t','--num-threads', type=int,
+    parser.add_argument('-t', '--num-threads', type=int,
                         help='Number of threads to run with', default=1)
     parser.add_argument('--calc_file', help='Calc file for fringe rotation')
-    parser.add_argument('-w','--hwfile', help='Hw delay file')
-    parser.add_argument('-p','--parset', help='Parset for delays')
+    parser.add_argument('-w', '--hwfile', help='Hw delay file')
+    parser.add_argument('-p', '--par_set', help='Parset for delays')
     parser.add_argument('--show', help='Show plot', action='store_true',
                         default=False)
-    parser.add_argument('-i','--nint',
+    parser.add_argument('-i', '--n_int',
                         help='Number of fine spectra to average', type=int,
                         default=128)
-    parser.add_argument('-f','--fscrunch',
+    parser.add_argument('-f', '--freq_scrunch',
                         help='Frequency average by this factor', default=1,
                         type=int)
     parser.add_argument('--rfidelay', type=int,
