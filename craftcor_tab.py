@@ -38,34 +38,6 @@ NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH    # Number of guard channels
 #   (5) Make as much as possible compatible with Python 3
 
 
-def print_delay(xx):
-    # TODO: (2, 3, 5)
-    xxang = np.angle(xx)
-    punwrap = np.unwrap(xxang)
-    f = np.arange(len(punwrap)) - len(punwrap)/2
-    gradient, phase = np.polyfit(f, punwrap, 1)
-
-    '''
-    pylab.figure(20)
-    pylab.plot(f, xxang)
-    pylab.plot(f, punwrap, 'x')
-    pylab.plot(f, np.polyval((gradient, phase), f))
-    pylab.show()
-    '''
-
-    delay = gradient / 2. / np.pi * len(punwrap)
-    delayns = delay / F_OS * 1e3 * (54./len(punwrap))
-
-    print('Unwrapped phase = {},\n'.format(phase)
-          + 'rad = {} deg,\n'.format(np.degrees(phase))
-          + 'gradient = {} rad per channel,\n'.format(gradient)
-          + 'delay = {},\n'.format(delay)
-          + 'samples = {} ns,\n'.format(delay / F_OS * 1e3)
-          + 'nsamp = {}'.format(len(punwrap)))
-
-    return delay, np.degrees(phase)
-
-
 class AntennaSource(object):
     # TODO: (1, 2, 4, 5)
     def __init__(self, vfile):
