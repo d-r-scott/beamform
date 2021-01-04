@@ -499,14 +499,6 @@ class Correlator(object):
         self.curr_mjd_mid = self.mjd0 + self.inttime_days*(i + 0.5) + abs_delay_days
         self.curr_mjd_end = self.mjd0 + self.inttime_days*(i + 1.0) + abs_delay_days
 
-    def next_integration(self):
-        # TODO: (1, 2, 3, 4, 5)
-        #self.curr_intno +=
-        self.curr_intno += 1
-        self.curr_samp += self.nint
-        self.calcmjd()
-        self.get_fr_data()
-
     def get_calc_results(self, mjd):
         # TODO: (1, 2, 3, 4, 5)
         #res = self.calcresults.scans[0].eval_src0_poly_delta(mjd, self.refant.ant_name.lower())
