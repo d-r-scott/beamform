@@ -70,9 +70,9 @@ def print_delay(xx):
 
 
 class AntennaSource(object):
-    # TODO: (1, 2, 3, 4, 5)
+    # TODO: (1, 2, 4, 5)
     def __init__(self, vfile):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         self.vfile = vfile
         self.ant_name = self.vfile.hdr['ANT'][0].lower()
         self.antno = int(self.vfile.hdr['ANTENNA_NO'][0])
@@ -343,11 +343,11 @@ class AntennaSource(object):
 
 
 class FringeRotParams(object):
-    # TODO: (1, 2, 3, 4, 5)
+    # TODO: (1, 2, 4, 5)
     cols = ('U (m)', 'V (m)', 'W (m)', 'DELAY (us)')
 
     def __init__(self, corr, ant):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         mid_data = corr.frdata_mid[ant.ant_name]
         self.u,self.v,self.w,self.delay = map(float, [mid_data[c] for c in FringeRotParams.cols])
         self.delay_start = float(corr.frdata_start[ant.ant_name]['DELAY (us)'])
@@ -357,7 +357,7 @@ class FringeRotParams(object):
         self.corr = corr
 
     def __str__(self):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         s = 'FR {} uvw=({},{},{}) m = {} us'.format(self.ant.ant_name, self.u, self.v, self.w, self.delay)
         return s
 
@@ -365,9 +365,9 @@ class FringeRotParams(object):
 
 
 class Correlator(object):
-    # TODO: (1, 2, 3, 4, 5)
+    # TODO: (1, 2, 4, 5)
     def __init__(self, ants, sources, values, abs_delay=0):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         self.running = True
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
@@ -429,11 +429,11 @@ class Correlator(object):
         logging.debug('F0 %f FINE CHANNEL %f kHz num=%d freqs=%s', self.f0, self.fine_chanbw*1e3, self.nfine_chan, self.freqs)
 
     def exit_gracefully(self, signum, frame):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         self.running = False
 
     def parse_parset(self):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         self.parset = {}
 
         # open the fcm file
@@ -448,20 +448,20 @@ class Correlator(object):
                 self.parset[name] = value
 
     def parse_mir(self):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         #self.mir = None
         #if self.values.mirsolutions is not None or self.values.aips_c is not None:
         self.mir = MiriadGainSolutions(self.values.mirsolutions,self.values.aips_c, self.pol, self.freqs)
 
     def get_ant_location(self, antno):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         key = 'common.antenna.ant{}.location.itrf'.format(antno)
         value = self.parset[key]
         location = map(float, value.replace('[','').replace(']','').split(','))
         return location
 
     def get_fixed_delay_usec(self, antno):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         key = 'common.antenna.ant{}.delay'.format(antno)
         value = self.parset[key]
         delayns =  float(value.replace('ns',''))
@@ -470,7 +470,7 @@ class Correlator(object):
         return delayus
 
     def get_geometric_delay_delayrate_us(self, ant):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         fr1 = FringeRotParams(self, ant)
         fr2 = FringeRotParams(self, self.refant)
 
@@ -492,7 +492,7 @@ class Correlator(object):
         return (delay, delayrate)
 
     def calcmjd(self):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         i = float(self.curr_intno)
         abs_delay_days = float(self.abs_delay)/86400./(self.fs*1e6)
         self.curr_mjd_start = self.mjd0 + self.inttime_days*(i + 0.0) + abs_delay_days
@@ -500,20 +500,20 @@ class Correlator(object):
         self.curr_mjd_end = self.mjd0 + self.inttime_days*(i + 1.0) + abs_delay_days
 
     def get_calc_results(self, mjd):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         #res = self.calcresults.scans[0].eval_src0_poly_delta(mjd, self.refant.ant_name.lower())
         res = self.calcresults.scans[0].eval_src0_poly(mjd)  # Calcresults is a ResultsFile
 
         return res
 
     def get_fr_data(self):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         self.frdata_start = self.get_calc_results(self.curr_mjd_start)
         self.frdata_mid = self.get_calc_results(self.curr_mjd_mid)
         self.frdata_end = self.get_calc_results(self.curr_mjd_end)
 
     def do_tab(self, an=None):
-        # TODO: (1, 2, 3, 4, 5)
+        # TODO: (1, 2, 4, 5)
         # Tied-array beamforming
         
         nsamp = self.nint
