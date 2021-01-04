@@ -69,74 +69,6 @@ def print_delay(xx):
     return delay, np.degrees(phase)
 
 
-class PlotOut(object):
-    # TODO: (1, 2, 3, 4, 5)
-    def __init__(self, corr):
-        # TODO: (1, 2, 3, 4, 5)
-        self.stuff = []
-        self.corr = corr
-        self.delayout = open(corr.values.outfile.replace('.fits','')+'.delays.parset', 'w')
-
-    def put_product(self, a1, a2, xxp):
-        # TODO: (1, 2, 3, 4, 5)
-        if self.corr.values.show:
-            if a1 != a2:
-                xx= xxp[:,0]
-                self.stuff.append(xx)
-                self.last_xx = (a1, a2, xx)
-                if len(self.stuff) >0:
-                    self.plot_stuff(a1, a2)
-
-    def plot_stuff(self, a1, a2):
-        # TODO: (1, 2, 3, 4, 5)
-        '''(a1, a2, xx) = self.last_xx
-        fig, (ax1, ax2, ax3, ax4, ax5,ax6) = pylab.subplots(6,1)
-        xxang = np.angle(xx)
-        print_delay(xx)
-        ax1.plot(abs(xx))
-        ax2.plot(np.degrees(xxang), 'o')
-        nf = self.corr.nfine_out_per_coarse
-        for i in xrange(self.corr.ncoarse_chan):
-            ax2.axvline(nf*i, c='r')
-            ax1.axvline(nf*i, c='r')
-            print 'PLOTSTUFF', nf, i, nf*i, nf*(i+1), self.corr.ncoarse_chan, xx.shape
-            print_delay(xx[nf*i:nf*(i+1)])
-
-        lag = np.fft.fftshift(abs(np.fft.fft(xx)))
-        lagidx = np.argmax(lag)
-        lagoff = lagidx - len(xx)/2.0
-        lagns= lagoff/self.corr.full_bw*1e3
-        lagsn = lag[lagidx]/np.std(lag[0:lagidx-100])
-        lagx = np.arange(len(lag)) - len(lag)/2.0
-        ax3.plot(lagx/self.corr.full_bw*1e3, lag,label='lag')
-        ax3.axvline(0, c='r')
-        ax3.set_xlabel('Delay (ns)')
-        angxx = np.angle(np.array(self.stuff))
-        ax4.imshow(angxx, aspect='auto')
-        phase_vt = np.degrees(angxx[:, 10:50].mean(axis=1))
-        t = np.arange(len(phase_vt))
-        rate, offset = np.polyfit(t, phase_vt, 1)
-        fit_std = (np.polyval((rate, offset), t) - phase_vt).std()
-        ax5.plot(phase_vt)
-        ax6.imshow(abs(np.array(self.stuff)), aspect='auto')
-        print 'Phase rate={} offset={} std={} deg lagoff={}samples = {}ns lag S/N={}'.format(rate, offset, fit_std, lagoff, lagns, lagsn)
-        fig.suptitle('a1 {} a2 {}'.format(a1.ant_name, a2.ant_name))
-        curr_delay = self.corr.get_fixed_delay_usec(a2.antno)*1e3
-        if a1 != a2:
-            self.delayout.write('#{}={} S/N={} delay={}ns\n'.format(a1.ant_name, a2.ant_name, lagsn, lagns))
-            self.delayout.write('common.antenna.ant{}.delay={}ns\n'.format(a2.antno, curr_delay+lagns))
-            self.delayout.flush()
-
-        pylab.show()'''
-        return # added by hyerin 
-
-    def finish(self):
-        # TODO: (1, 2, 3, 4, 5)
-        stuff = np.array(self.stuff)
-        #pylab.imshow(np.angle(stuff))
-        #pylab.show()
-
-
 class AntennaSource(object):
     # TODO: (1, 2, 3, 4, 5)
     def __init__(self, vfile):
@@ -487,7 +419,6 @@ class Correlator(object):
         self.inttime_days = self.inttime_secs/86400.
         self.curr_intno = 0
         self.curr_samp = self.curr_intno*self.nint + 1000
-        self.prodout = PlotOut(self)
         self.calcmjd()
         self.get_fr_data()
         self.pol = self.ants[0].pol
