@@ -640,13 +640,6 @@ class Correlator(object):
             temp = ant.do_f_tab(self,iant)
             return temp
     
-    def put_product(self, a1, a2, xx):
-        # TODO: (1, 2, 3, 4, 5)
-        self.prodout.put_product(a1, a2, xx)
-        uvw = self.get_uvw(a1, a2)
-        #self.fileout.put_data(uvw, self.curr_mjd_mid, a1.ia, a2.ia,
-            #self.inttime_secs, xx)
-
 
 def parse_delays(values):
     # TODO: (1, 2, 3, 4, 5)
