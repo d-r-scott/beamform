@@ -159,11 +159,12 @@ class AntennaSource(object):
         self.all_geom_delays = []
         self.all_mjds = []
         self.pol = self.vfile.pol.lower()
+        self.fringe_rot_params = None
         print 'antenna {} {}'.format(self.antname, self.vfile.freqconfig)
 
     def do_f(self, corr):
         # TODO: (1, 2, 3, 4, 5)
-        self.frparams = FringeRotParams(corr, self)
+        self.fringe_rot_params = FringeRotParams(corr, self)
         # calculate sample start
         framediff_samp = corr.refant.trigger_frame - self.trigger_frame
         framediff_us = framediff_samp / corr.fs
@@ -238,9 +239,16 @@ class AntennaSource(object):
             fcend = (c+1)*nfine
             self.data[:, fcstart:fcend, 0] = xfguard
 
-    def do_f_tab(self, corr, iant):
-        # TODO: (2, 3, 4, 5)
-        self.frparams = FringeRotParams(corr, self)
+    def do_f_tab(self, corr, i_ant):
+        """Perform the tied-array beamforming for this antenna.
+
+        :param corr: Correlator object containing constants and
+                     functions required for beamforming
+        :param i_ant: Incremental antenna number
+        :return: beamformed complex voltage time series
+        """
+        # TODO: (2, 4, 5)
+        self.fringe_rot_params = FringeRotParams(corr, self)
 
         # calculate sample start
         framediff_samp = corr.refant.trigger_frame - self.trigger_frame
@@ -264,41 +272,41 @@ class AntennaSource(object):
 
         data_out = np.zeros((corr.nint, corr.nfine_chan, corr.npol_in),
                             dtype=np.complex64)
-        nfine = corr.nfft - 2*corr.nguard_chan
+        n_fine = corr.nfft - 2*corr.nguard_chan
 
-        nsamp = corr.nint * corr.nfft
+        n_samp = corr.nint * corr.nfft
 
         # time-dependent geometric delays
-        # np.linspace(0, 1, nsamp) == time in units of integrations
+        # np.linspace(0, 1, n_samp) == time in units of integrations
         geom_delays_us = (geom_delay_us
                          + geom_delay_rate_us
-                         * np.linspace(0, 1, nsamp)
+                         * np.linspace(0, 1, n_samp)
                          - fixed_delay_us)
 
-        np.save('delays/geom_delays_us_{}'.format(iant), geom_delays_us)
+        np.save('delays/geom_delays_us_{}'.format(i_ant), geom_delays_us)
 
         print('')
-        basestr = '{} : {}'
-        print(basestr.format('framediff_samp', framediff_samp))
-        print(basestr.format('framediff_us', framediff_us))
-        print(basestr.format('geom_delay_us', geom_delay_us))
-        print(basestr.format('geom_delay_rate_us', geom_delay_rate_us))
-        print(basestr.format('geom_delay_samp', geom_delay_samp))
-        print(basestr.format('np.mean(deom_delays_us)',
-                             np.mean(geom_delays_us)))
-        print(basestr.format('fixed_delay_us', fixed_delay_us))
-        print(basestr.format('fixed_delay_samp', fixed_delay_samp))
-        print(basestr.format('total_delay_samp', total_delay_samp))
-        print(basestr.format('whole_delay', whole_delay))
-        print(basestr.format('total_delay_us', total_delay_us))
-        print(basestr.format('whole_delay_us', whole_delay_us))
-        print(basestr.format('frac_delay_samp', frac_delay_samp))
-        print(basestr.format('frac_delay_us', frac_delay_us))
+        base_str = '{} : {}'
+        print(base_str.format('framediff_samp', framediff_samp))
+        print(base_str.format('framediff_us', framediff_us))
+        print(base_str.format('geom_delay_us', geom_delay_us))
+        print(base_str.format('geom_delay_rate_us', geom_delay_rate_us))
+        print(base_str.format('geom_delay_samp', geom_delay_samp))
+        print(base_str.format('np.mean(geom_delays_us)',
+                              np.mean(geom_delays_us)))
+        print(base_str.format('fixed_delay_us', fixed_delay_us))
+        print(base_str.format('fixed_delay_samp', fixed_delay_samp))
+        print(base_str.format('total_delay_samp', total_delay_samp))
+        print(base_str.format('whole_delay', whole_delay))
+        print(base_str.format('total_delay_us', total_delay_us))
+        print(base_str.format('whole_delay_us', whole_delay_us))
+        print(base_str.format('frac_delay_samp', frac_delay_samp))
+        print(base_str.format('frac_delay_us', frac_delay_us))
         print('')
 
-        print("antenna #: ",iant, self.antname)
-        sampoff = whole_delay + corr.abs_delay
-        frameid = self.vfile.start_frameid + sampoff
+        print("antenna #: ", i_ant, self.antname)
+        sample_offset = whole_delay + corr.abs_delay
+        frameid = self.vfile.start_frameid + sample_offset
         print('FRAMEID: '
               + str(frameid)
               + ', remainder from 32: '
@@ -309,37 +317,38 @@ class AntennaSource(object):
         remainder is 0
         '''
 
-        rawd = self.vfile.read(sampoff, nsamp)
+        raw_data = self.vfile.read(sample_offset, n_samp)
 
-        assert rawd.shape == (nsamp, corr.ncoarse_chan),\
+        assert raw_data.shape == (n_samp, corr.ncoarse_chan),\
             'Unexpected shape from vfile: {} expected ({},{})'.format(
-                rawd.shape, nsamp, corr.ncoarse_chan)
+                raw_data.shape, n_samp, corr.ncoarse_chan)
 
 
-        turn_fracs = np.zeros((336, nfine+1))
+        turn_fracs = np.zeros((336, n_fine+1))
 
-        for i, c in enumerate(xrange(corr.ncoarse_chan)):
+        for i, chan in enumerate(xrange(corr.ncoarse_chan)):
             # Channel frequency
-            cfreq = corr.freqs[c]
-            turn_fracs[i, 0] = cfreq
+            centre_freq = corr.freqs[chan]
+            turn_fracs[i, 0] = centre_freq
 
             '''
-            Array of fine channel frequencies relative to coarse frequency
+            Array of fine channel frequencies relative to centre frequency
             More appropriately named Delta_f?
             Goes from -0.5 to 0.5
             '''
-            freqs = corr.fine_chanbw * (np.arange(nfine, dtype=np.float)
-                                        - float(nfine)/2.0)
+            delta_freq = (corr.fine_chanbw
+                          * (np.arange(n_fine, dtype=np.float)
+                          - float(n_fine)/2.0))
 
             # TODO: what is sideband?
             if corr.sideband == -1:
-                freqs = -freqs
+                delta_freq = -delta_freq
 
             '''
-            rawd's shape: (nsamp, corr.ncoarse_chan)
-            nsamp = input.i * (64 * input.n)
+            raw_data's shape: (n_samp, corr.ncoarse_chan)
+            n_samp = input.i * (64 * input.n)
             '''
-            x1 = rawd[:, c].reshape(-1, corr.nfft)
+            x1 = raw_data[:, chan].reshape(-1, corr.nfft)
 
             '''
             fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
@@ -348,8 +357,8 @@ class AntennaSource(object):
             geom_delay_us accounts for Earth's rotation
             '''
             # Fringe rotation for Earth's rotation
-            turn_fringe = cfreq * geom_delays_us
-            phasor_fringe = np.exp(np.pi * 2j * turn_fringe,
+            turn_fringe = centre_freq * geom_delays_us
+            phasor_fringe = np.exp(2j * np.pi * turn_fringe,
                                    dtype=np.complex64)
             x1 *= phasor_fringe
 
@@ -361,20 +370,20 @@ class AntennaSource(object):
             xf1 = np.fft.fft(x1, axis=1)
             xf1 = np.fft.fftshift(xf1, axes=1)
             # scale because otherwise it overflows
-            xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan+nfine:]
+            xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan+n_fine:]
 
             # Fractional sample phases
-            turn_frac = freqs * np.mean(geom_delays_us)
+            turn_frac = delta_freq * np.mean(geom_delays_us)
             turn_fracs[i, 1:] = turn_frac
 
             # phasors to rotate the data with constant amplitude = 1
             phasor = np.exp(np.pi * 2j * turn_frac, dtype=np.complex64)
 
             # get absolute frequencies in gigahertz
-            freq_ghz = (cfreq+freqs) / 1e3
+            freq_ghz = (centre_freq+delta_freq) / 1e3
 
             # get the calibration solutions and apply them to the phasors
-            mir_cor = corr.mir.get_solution(iant, 0, freq_ghz)
+            mir_cor = corr.mir.get_solution(i_ant, 0, freq_ghz)
 
             if mir_cor[0] == 0: # if correction is 0, flag data
                 phasor *= 0
@@ -384,8 +393,8 @@ class AntennaSource(object):
             xfguard_f *= phasor
 
             # select the channels for this coarse channel
-            fcstart = c * nfine
-            fcend = (c+1) * nfine
+            fine_chan_start = chan * n_fine
+            fine_chan_end = (chan+1) * n_fine
 
             '''
             RECAP
@@ -399,9 +408,9 @@ class AntennaSource(object):
             Slot xfguard (a trimmed spectrum for this coarse channel) 
             into the corresponding slice of the fine channels
             '''
-            data_out[:, fcstart:fcend, 0] = xfguard_f
+            data_out[:, fine_chan_start:fine_chan_end, 0] = xfguard_f
 
-        np.save('delays/turn_fracs_{}'.format(iant), turn_fracs)
+        np.save('delays/turn_fracs_{}'.format(i_ant), turn_fracs)
 
         return data_out
 
@@ -928,7 +937,7 @@ class MiriadGainSolutions(object):
         # TODO: (1, 2, 3, 4, 5)
         '''
         Get solution including time and bandpass
-        iant - antenna index
+        i_ant - antenna index
         time - some version of time. Ignored for now
         freq_ghz - frequency float in Ghz
         '''
