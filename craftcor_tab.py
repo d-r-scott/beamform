@@ -24,6 +24,11 @@ __author__ = "Keith Bannister <keith.bannister@csiro.au>"
 
 CLIGHT=299792458.0
 
+# TODO: Cleanup (not in any particular order)
+#   (1) PEP-008ify everything
+#   (2) Document all functions
+#   (3) Ensure only necessary functions remain
+
 def print_delay(xx):
     xxang = np.angle(xx)
     punwrap = np.unwrap(xxang)
