@@ -69,15 +69,6 @@ def print_delay(xx):
     return delay, np.degrees(phase)
 
 
-class FitsOut(object):
-    # TODO: (1, 2, 3, 4, 5)
-    def __init__(self, fname, corr):
-        ants = self.corr.ants
-
-    def put_product(self, corr, a1, a2, xx):
-        pass
-
-
 class PlotOut(object):
     # TODO: (1, 2, 3, 4, 5)
     def __init__(self, corr):
@@ -732,8 +723,6 @@ def parse_delays(values):
     
 
     return delays
-
-
 
 
 def load_sources(calc_file):
