@@ -4,6 +4,9 @@ Tied-array beamforming vcraft files, based on "craftcor.py".
 
 Copyright (C) CSIRO 2017
 """
+
+__author__ = 'Keith Bannister <keith.bannister@csiro.au>'
+
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import logging
 import multiprocessing
@@ -18,7 +21,6 @@ from calc11 import ResultsFile
 from miriad import MiriadGainSolutions
 import vcraft
 
-__author__ = "Keith Bannister <keith.bannister@csiro.au>"
 
 # constants
 C_LIGHT = 299792458.0   # Speed of light (m/s)
