@@ -108,30 +108,26 @@ class AntennaSource(object):
         np.save('delays/geom_delays_us_{}'.format(i_ant), geom_delays_us)
 
         print('')
-        base_str = '{} : {}'
-        print(base_str.format('framediff_samp', framediff_samp))
-        print(base_str.format('framediff_us', framediff_us))
-        print(base_str.format('geom_delay_us', geom_delay_us))
-        print(base_str.format('geom_delay_rate_us', geom_delay_rate_us))
-        print(base_str.format('geom_delay_samp', geom_delay_samp))
-        print(base_str.format('np.mean(geom_delays_us)',
-                              np.mean(geom_delays_us)))
-        print(base_str.format('fixed_delay_us', fixed_delay_us))
-        print(base_str.format('fixed_delay_samp', fixed_delay_samp))
-        print(base_str.format('total_delay_samp', total_delay_samp))
-        print(base_str.format('whole_delay', whole_delay))
-        print(base_str.format('total_delay_us', total_delay_us))
-        print(base_str.format('whole_delay_us', whole_delay_us))
-        print(base_str.format('frac_delay_samp', frac_delay_samp))
-        print(base_str.format('frac_delay_us', frac_delay_us))
+        print_var('framediff_samp', framediff_samp)
+        print_var('framediff_us', framediff_us)
+        print_var('geom_delay_us', geom_delay_us)
+        print_var('geom_delay_rate_us', geom_delay_rate_us)
+        print_var('geom_delay_samp', geom_delay_samp)
+        print_var('np.mean(geom_delays_us)', np.mean(geom_delays_us))
+        print_var('fixed_delay_us', fixed_delay_us)
+        print_var('fixed_delay_samp', fixed_delay_samp)
+        print_var('total_delay_samp', total_delay_samp)
+        print_var('whole_delay', whole_delay)
+        print_var('total_delay_us', total_delay_us)
+        print_var('whole_delay_us', whole_delay_us)
+        print_var('frac_delay_samp', frac_delay_samp)
+        print_var('frac_delay_us', frac_delay_us)
         print('')
 
         print("antenna #: ", i_ant, self.ant_name)
         sample_offset = whole_delay + corr.abs_delay
         frameid = self.vfile.start_frameid + sample_offset
-        print('FRAMEID: '
-              + str(frameid)
-              + ', remainder from 32: '
+        print('FRAMEID: ' + str(frameid) + ', remainder from 32: '
               + str(frameid % 32))
 
         '''
