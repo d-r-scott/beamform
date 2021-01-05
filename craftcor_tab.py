@@ -47,18 +47,41 @@ NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH    # Number of guard channels
 class AntennaSource(object):
     # TODO: (1, 2, 4, 5)
     def __init__(self, vfile):
-        # TODO: (2, 4, 5)
+        """Initialise the AntennaSource object.
+
+        Gets much of the information from the vfile, which is a data
+        structure representing the voltages in increasing frequency
+        order.
+
+        :param vfile: The vfile for this antenna
+
+        :field vfile: The vfile for this antenna
+        :field ant_name: Antenna name. Of the format 'AK**'
+        :field antno: Antenna number between 1-36. Note that this is the
+                      physical antenna number, and some antennas may not
+                      be present.
+        :field mjd_start: Start time of the voltages in MJD
+        :field trigger_frame: TODO: ?
+        :field hdr: Header file for the vfile
+        :field all_geom_delays: List of all geometric delays calculated
+                                for each channel
+        :field all_mjd_mids: List of all central MJDs calculated by the
+                             Correlator object
+        :field pol: Polarisation of this antenna
+
+        :func do_f_tab: Perform the tied-array beamforming for this
+                        antenna.
+        """
+        # TODO: (5)
         self.vfile = vfile
         self.ant_name = self.vfile.hdr['ANT'][0].lower()
         self.antno = int(self.vfile.hdr['ANTENNA_NO'][0])
         self.mjd_start = self.vfile.start_mjd
         self.trigger_frame = self.vfile.start_frameid
         self.hdr = self.vfile.hdr
-        self.init_geom_delay_us = None
         self.all_geom_delays = []
-        self.all_mjds = []
+        self.all_mjd_mids = []
         self.pol = self.vfile.pol.lower()
-        self.fringe_rot_params = None
         print('antenna {} {}'.format(self.ant_name, self.vfile.freqconfig))
 
     def do_f_tab(self, corr, i_ant):
@@ -70,7 +93,6 @@ class AntennaSource(object):
         :return: beamformed complex voltage time series
         """
         # TODO: (2, 4, 5)
-        self.fringe_rot_params = FringeRotParams(corr, self)
 
         # calculate sample start
         framediff_samp = corr.ref_ant.trigger_frame - self.trigger_frame
@@ -79,7 +101,7 @@ class AntennaSource(object):
         geom_delay_us, geom_delay_rate_us = \
             corr.get_geometric_delay_delayrate_us(self)
         self.all_geom_delays.append(geom_delay_us)
-        self.all_mjds.append(corr.curr_mjd_mid)
+        self.all_mjd_mids.append(corr.curr_mjd_mid)
 
         geom_delay_samp = geom_delay_us * corr.fs
         fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
