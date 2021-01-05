@@ -47,7 +47,7 @@ NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH    # Number of guard channels
 class AntennaSource(object):
     # TODO: (1, 2, 4, 5)
     def __init__(self, vfile):
-        # TODO: (1, 2, 4, 5)
+        # TODO: (2, 4, 5)
         self.vfile = vfile
         self.ant_name = self.vfile.hdr['ANT'][0].lower()
         self.antno = int(self.vfile.hdr['ANTENNA_NO'][0])
