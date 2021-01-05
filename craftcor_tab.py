@@ -5,7 +5,11 @@ Tied-array beamforming vcraft files, based on "craftcor.py".
 Copyright (C) CSIRO 2017
 """
 
-__author__ = 'Keith Bannister <keith.bannister@csiro.au>'
+__author__ = ['Keith Bannister, CSIRO <keith.bannister@csiro.au>',
+              'Hyerin Cho, Curtin University/Swinburne University '
+              + '<chyerin1996@gmail.com>',
+              'David Scott, Curtin University '
+              + '<david.r.scott@postgrad.curtin.edu.au']
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import logging
