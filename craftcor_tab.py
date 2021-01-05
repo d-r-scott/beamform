@@ -530,6 +530,16 @@ def get_antennas(values):
     return antennas
 
 
+def print_var(name, value):
+    """Print a variable name and value in a consistent way
+
+    :param name: Name of variable to be printed
+    :param value: Value of variable to be printed
+    """
+    base_str = '{} : {}'
+    print(base_str.format(name, value))
+
+
 def _main():
     # TODO: (2, 5)
     parser = ArgumentParser(description='Script description',
