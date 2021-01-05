@@ -255,22 +255,27 @@ class AntennaSource(object):
 
 
 class FringeRotParams(object):
-    # TODO: (1, 2, 4, 5)
-    cols = ('U (m)', 'V (m)', 'W (m)', 'DELAY (us)')
+    # TODO: (2, 5)
 
     def __init__(self, corr, ant):
-        # TODO: (1, 2, 4, 5)
+        # TODO: (2, 5)
         mid_data = corr.fringe_rot_data_mid[ant.ant_name]
-        self.u,self.v,self.w,self.delay = map(float, [mid_data[c] for c in FringeRotParams.cols])
-        self.delay_start = float(corr.fringe_rot_data_start[ant.ant_name]['DELAY (us)'])
-        self.delay_end = float(corr.fringe_rot_data_end[ant.ant_name]['DELAY (us)'])
-        self.delay_rate = (self.delay_end - self.delay_start)/float(corr.n_int)
+        self.u = float(mid_data['U (m)'])
+        self.v = float(mid_data['V (m)'])
+        self.w = float(mid_data['W (m)'])
+        self.delay = float(mid_data['DELAY (us)'])
+        self.delay_start = float(
+            corr.fringe_rot_data_start[ant.ant_name]['DELAY (us)'])
+        self.delay_end = float(
+            corr.fringe_rot_data_end[ant.ant_name]['DELAY (us)'])
+        self.delay_rate = (self.delay_end-self.delay_start) / float(corr.n_int)
         self.ant = ant
         self.corr = corr
 
     def __str__(self):
-        # TODO: (1, 2, 4, 5)
-        s = 'FR {} uvw=({},{},{}) m = {} us'.format(self.ant.ant_name, self.u, self.v, self.w, self.delay)
+        # TODO: (2, 5)
+        s = 'FR {} uvw=({},{},{}) m = {} us'.format(self.ant.ant_name, self.u,
+                                                    self.v, self.w, self.delay)
         return s
 
     __repr__ = __str__
