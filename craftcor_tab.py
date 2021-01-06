@@ -129,7 +129,7 @@ class AntennaSource(object):
         for i, chan in enumerate(xrange(corr.ncoarse_chan)):
             turn_fracs[i, :], xfguard_f, fine_chan_start, fine_chan_end = \
                 self.process_chan(i, chan, corr, n_fine, raw_data[:, chan],
-                                  turn_fracs[i, :])
+                                  geom_delays_us, i_ant)
 
             '''
             Slot xfguard (a trimmed spectrum for this coarse channel) 
@@ -164,14 +164,14 @@ class AntennaSource(object):
 
         return whole_delay, geom_delays_us
 
-    def process_chan(self, i, chan, corr, n_fine, chan_raw_data, chan_turn_fracs):
+    def process_chan(self, i, chan, corr, n_fine, chan_raw_data,
+                     geom_delays_us, i_ant):
+        # TODO: (1, 2, 4, 5)
         # Channel frequency
         centre_freq = corr.freqs[chan]
-        chan_turn_fracs[0] = centre_freq
 
         '''
         Array of fine channel frequencies relative to centre frequency
-        More appropriately named Delta_f?
         Goes from -0.5 to 0.5
         '''
         delta_freq = (corr.fine_chan_bwidth*(np.arange(n_fine, dtype=np.float)
@@ -206,12 +206,12 @@ class AntennaSource(object):
         '''
         xf1 = np.fft.fft(x1, axis=1)
         xf1 = np.fft.fftshift(xf1, axes=1)
+
         # scale because otherwise it overflows
         xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan + n_fine:]
 
         # Fractional sample phases
         turn_frac = delta_freq * np.mean(geom_delays_us)
-        turn_fracs[i, 1:] = turn_frac
 
         # phasors to rotate the data with constant amplitude = 1
         phasor = np.exp(np.pi * 2j * turn_frac, dtype=np.complex64)
@@ -241,7 +241,7 @@ class AntennaSource(object):
         xfguard.shape == (input.i, 64 * input.n)
         '''
 
-        return chan_turn_fracs, xfguard_f, fine_chan_start, fine_chan_end
+        return turn_frac, xfguard_f, fine_chan_start, fine_chan_end
 
 
 class FringeRotParams(object):
