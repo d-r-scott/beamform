@@ -25,13 +25,13 @@ from calc11 import ResultsFile
 from miriad import MiriadGainSolutions
 import vcraft
 
-
 # constants
-C_LIGHT = 299792458.0   # Speed of light (m/s)
-CHAN_BWIDTH = 27.0      # Channel bandwidth
-OS_NYQ_BWIDTH = 32.0    # Oversampled Nyquist bandwidth
+C_LIGHT = 299792458.0  # Speed of light (m/s)
+CHAN_BWIDTH = 27.0  # Channel bandwidth
+OS_NYQ_BWIDTH = 32.0  # Oversampled Nyquist bandwidth
 F_OS = OS_NYQ_BWIDTH / CHAN_BWIDTH  # Oversampling factor
-NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH    # Number of guard channels
+NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH  # Number of guard channels
+
 
 # TODO: Cleanup (not in any particular order)
 #   IN GENERAL: MAKE THINGS CONSISTENT AND NICE!
@@ -42,6 +42,107 @@ NUM_GUARD_CHAN = OS_NYQ_BWIDTH - CHAN_BWIDTH    # Number of guard channels
 #   (3) Ensure only necessary functions remain
 #   (4) Remove magic numbers!
 #   (5) Make as much as possible compatible with Python 3
+
+
+def process_chan(chan, corr, n_fine, chan_raw_data, geom_delays_us, i_ant):
+    """Process a particular channel of an Antenna.
+
+    Processing includes:
+        - Applying fringe rotation to account for the Earth's rotation
+        - Trimming the edge of the spectral content of the raw data to
+          remove the oversampled regions
+        - Applying geometric delay to the data
+        - Applying calibration solutions to the data
+
+    :param chan: Channel number as an integer.
+    :param corr: Correlator object.
+    :param n_fine: Number of fine channels as an integer.
+    :param chan_raw_data: The raw data for this channel. This data
+                          contains the edge regions that will be cut.
+    :param geom_delays_us: Geometric delays as a numpy array in units of
+                           microseconds.
+    :i_ant: Antenna number (NOT name) as an integer.
+    :return: xfguard_f: Processed channel spectral data
+             fine_chan_start: Index of the first fine channel in the
+                              combined spectral array.
+             fine_chan_end: Index of the last fine channel in the
+                            combined spectral array.
+    """
+    # TODO: (5)
+    # Channel frequency
+    centre_freq = corr.freqs[chan]
+
+    '''
+    Array of fine channel frequencies relative to centre frequency
+    Goes from -0.5 to 0.5
+    '''
+    delta_freq = (corr.fine_chan_bwidth * (np.arange(n_fine, dtype=np.float)
+                                           - float(n_fine) / 2.0))
+
+    # TODO: what is sideband?
+    if corr.sideband == -1:
+        delta_freq = -delta_freq
+
+    '''
+    raw_data's shape: (n_samp, corr.ncoarse_chan)
+    n_samp = input.i * (64 * input.n)
+    '''
+    x1 = chan_raw_data.reshape(-1, corr.n_fft)
+
+    '''
+    fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
+    fixed_delay_us is contained in fcm.txt for each antenna
+    geom_delay_us = corr.get_geometric_delay_delayrate_us(self)[0]
+    geom_delay_us accounts for Earth's rotation
+    '''
+    # Fringe rotation for Earth's rotation
+    turn_fringe = centre_freq * geom_delays_us
+    phasor_fringe = np.exp(2j * np.pi * turn_fringe, dtype=np.complex64)
+    x1 *= phasor_fringe
+
+    '''
+    corr.nguard_chan = NUM_GUARD_CHAN * input.n 
+                     = number of fine channels on each side to cut off
+    xfguard is xf1 with the ends trimmed off
+    '''
+    xf1 = np.fft.fft(x1, axis=1)
+    xf1 = np.fft.fftshift(xf1, axes=1)
+
+    # scale because otherwise it overflows
+    xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan + n_fine:]
+
+    # Fractional sample phases
+    turn_frac = delta_freq * np.mean(geom_delays_us)
+
+    # phasors to rotate the data with constant amplitude = 1
+    phasor = np.exp(np.pi * 2j * turn_frac, dtype=np.complex64)
+
+    # get absolute frequencies in gigahertz
+    freq_ghz = (centre_freq + delta_freq) / 1e3
+
+    # get the calibration solutions and apply them to the phasors
+    mir_cor = corr.mir.get_solution(i_ant, 0, freq_ghz)
+
+    if mir_cor[0] == 0:  # if correction is 0, flag data
+        phasor *= 0
+    else:
+        phasor /= mir_cor
+
+    xfguard_f *= phasor
+
+    # select the channels for this coarse channel
+    fine_chan_start = chan * n_fine
+    fine_chan_end = (chan + 1) * n_fine
+
+    '''
+    RECAP
+    xfguard is a "dynamic" spectrum of the current coarse 
+    channel in only the fine channels not trimmed 
+    (oversampled PFB).
+    xfguard.shape == (input.i, 64 * input.n)
+    '''
+
+    return xfguard_f, fine_chan_start, fine_chan_end
 
 
 class AntennaSource(object):
@@ -100,12 +201,10 @@ class AntennaSource(object):
         data_out = np.zeros((corr.n_int, corr.n_fine_chan, corr.n_pol_in),
                             dtype=np.complex64)
 
-        n_fine = corr.n_fft - 2*corr.nguard_chan
+        n_fine = corr.n_fft - 2 * corr.nguard_chan
         n_samp = corr.n_int * corr.n_fft
 
         whole_delay, geom_delays_us = self.get_delays(corr, n_samp)
-
-        np.save('delays/geom_delays_us_{}'.format(i_ant), geom_delays_us)
 
         print("antenna #: ", i_ant, self.ant_name)
         sample_offset = whole_delay + corr.abs_delay
@@ -120,24 +219,20 @@ class AntennaSource(object):
 
         raw_data = self.vfile.read(sample_offset, n_samp)
 
-        assert raw_data.shape == (n_samp, corr.ncoarse_chan),\
+        assert raw_data.shape == (n_samp, corr.ncoarse_chan), \
             'Unexpected shape from vfile: {} expected ({},{})'.format(
                 raw_data.shape, n_samp, corr.ncoarse_chan)
 
-        turn_fracs = np.zeros((336, n_fine+1))
-
         for i, chan in enumerate(xrange(corr.ncoarse_chan)):
-            turn_fracs[i, :], xfguard_f, fine_chan_start, fine_chan_end = \
-                self.process_chan(i, chan, corr, n_fine, raw_data[:, chan],
-                                  geom_delays_us, i_ant)
+            xfguard_f, fine_chan_start, fine_chan_end = \
+                process_chan(chan, corr, n_fine, raw_data[:, chan],
+                             geom_delays_us, i_ant)
 
             '''
             Slot xfguard (a trimmed spectrum for this coarse channel) 
             into the corresponding slice of the fine channels
             '''
             data_out[:, fine_chan_start:fine_chan_end, 0] = xfguard_f
-
-        np.save('delays/turn_fracs_{}'.format(i_ant), turn_fracs)
 
         return data_out
 
@@ -164,85 +259,6 @@ class AntennaSource(object):
 
         return whole_delay, geom_delays_us
 
-    def process_chan(self, i, chan, corr, n_fine, chan_raw_data,
-                     geom_delays_us, i_ant):
-        # TODO: (1, 2, 4, 5)
-        # Channel frequency
-        centre_freq = corr.freqs[chan]
-
-        '''
-        Array of fine channel frequencies relative to centre frequency
-        Goes from -0.5 to 0.5
-        '''
-        delta_freq = (corr.fine_chan_bwidth*(np.arange(n_fine, dtype=np.float)
-                      - float(n_fine)/2.0))
-
-        # TODO: what is sideband?
-        if corr.sideband == -1:
-            delta_freq = -delta_freq
-
-        '''
-        raw_data's shape: (n_samp, corr.ncoarse_chan)
-        n_samp = input.i * (64 * input.n)
-        '''
-        x1 = chan_raw_data.reshape(-1, corr.n_fft)
-
-        '''
-        fixed_delay_us = corr.get_fixed_delay_usec(self.antno)
-        fixed_delay_us is contained in fcm.txt for each antenna
-        geom_delay_us = corr.get_geometric_delay_delayrate_us(self)[0]
-        geom_delay_us accounts for Earth's rotation
-        '''
-        # Fringe rotation for Earth's rotation
-        turn_fringe = centre_freq * geom_delays_us
-        phasor_fringe = np.exp(2j * np.pi * turn_fringe,
-                               dtype=np.complex64)
-        x1 *= phasor_fringe
-
-        '''
-        corr.nguard_chan = NUM_GUARD_CHAN * input.n 
-                         = number of fine channels on each side to cut off
-        xfguard is xf1 with the ends trimmed off
-        '''
-        xf1 = np.fft.fft(x1, axis=1)
-        xf1 = np.fft.fftshift(xf1, axes=1)
-
-        # scale because otherwise it overflows
-        xfguard_f = xf1[:, corr.nguard_chan:corr.nguard_chan + n_fine:]
-
-        # Fractional sample phases
-        turn_frac = delta_freq * np.mean(geom_delays_us)
-
-        # phasors to rotate the data with constant amplitude = 1
-        phasor = np.exp(np.pi * 2j * turn_frac, dtype=np.complex64)
-
-        # get absolute frequencies in gigahertz
-        freq_ghz = (centre_freq + delta_freq) / 1e3
-
-        # get the calibration solutions and apply them to the phasors
-        mir_cor = corr.mir.get_solution(i_ant, 0, freq_ghz)
-
-        if mir_cor[0] == 0:  # if correction is 0, flag data
-            phasor *= 0
-        else:
-            phasor /= mir_cor
-
-        xfguard_f *= phasor
-
-        # select the channels for this coarse channel
-        fine_chan_start = chan * n_fine
-        fine_chan_end = (chan + 1) * n_fine
-
-        '''
-        RECAP
-        xfguard is a "dynamic" spectrum of the current coarse 
-        channel in only the fine channels not trimmed 
-        (oversampled PFB).
-        xfguard.shape == (input.i, 64 * input.n)
-        '''
-
-        return turn_frac, xfguard_f, fine_chan_start, fine_chan_end
-
 
 class FringeRotParams(object):
     # TODO: (2, 5)
@@ -258,7 +274,7 @@ class FringeRotParams(object):
             corr.fringe_rot_data_start[ant.ant_name]['DELAY (us)'])
         self.delay_end = float(
             corr.fringe_rot_data_end[ant.ant_name]['DELAY (us)'])
-        self.delay_rate = (self.delay_end-self.delay_start) / float(corr.n_int)
+        self.delay_rate = (self.delay_end - self.delay_start) / float(corr.n_int)
         self.ant = ant
         self.corr = corr
 
@@ -300,7 +316,7 @@ class Correlator(object):
         self.n_fft = 64 * values.fft_size
         self.nguard_chan = NUM_GUARD_CHAN * values.fft_size
         self.oversamp = F_OS
-        self.fs = self.oversamp     # samples per microsecond
+        self.fs = self.oversamp  # samples per microsecond
         self.ncoarse_chan = len(self.ref_ant.vfile.freqs)
         self.sideband = -1
         self.coarse_chan_bwidth = 1.0
@@ -412,7 +428,7 @@ class Correlator(object):
     def calc_mjd(self):
         # TODO: (1, 2, 4, 5)
         i = float(self.curr_int_no)
-        abs_delay_days = float(self.abs_delay)/86400./(self.fs*1e6)
+        abs_delay_days = float(self.abs_delay) / 86400. / (self.fs * 1e6)
         self.curr_mjd_start = self.mjd0 + self.int_time_days * (i + 0.0) + abs_delay_days
         self.curr_mjd_mid = self.mjd0 + self.int_time_days * (i + 0.5) + abs_delay_days
         self.curr_mjd_end = self.mjd0 + self.int_time_days * (i + 1.0) + abs_delay_days
@@ -432,14 +448,14 @@ class Correlator(object):
     def do_tab(self, an=None):
         # TODO: (1, 2, 4, 5)
         # Tied-array beamforming
-        
+
         n_samp = self.n_int
-        n_chan = self.ncoarse_chan*self.n_fine_per_coarse
-            
+        n_chan = self.ncoarse_chan * self.n_fine_per_coarse
+
         sum_aligned = np.zeros((n_samp, n_chan, self.n_pol_in),
                                dtype=np.complex64)
-        
-        if an == None: # add all antennas
+
+        if an == None:  # add all antennas
             print('## Summing up all ' + str(len(self.ants)) + ' antennas')
             if self.values.tab:
                 print('coherent sum')
@@ -448,9 +464,9 @@ class Correlator(object):
             for iant, ant in enumerate(self.ants):
                 if not self.running:
                     raise KeyboardInterrupt()
-            
+
                 temp = ant.do_f_tab(self, iant)
-                
+
                 if self.values.tab:
                     sum_aligned += temp
                 else:
@@ -463,7 +479,7 @@ class Correlator(object):
             iant = an
             temp = ant.do_f_tab(self, iant)
             return temp
-    
+
 
 def parse_delays(values):
     # TODO: (2, 4, 5)
@@ -479,8 +495,8 @@ def parse_delays(values):
                 bits = line.split()
                 if not line.startswith('#') and len(bits) == 2:
                     raw = -int(bits[1])
-                    if raw % 8 != 0:    # if it is not a multiple of 8, round
-                        new = int(8 * round(float(raw)/8))
+                    if raw % 8 != 0:  # if it is not a multiple of 8, round
+                        new = int(8 * round(float(raw) / 8))
                         print('hwdelay ', raw, ' rounded to ', new)
                         delays[bits[0].strip()] = new
                     else:
@@ -511,7 +527,7 @@ def load_sources(calc_file):
         bits = line.split(':')
         if len(bits) != 2:
             continue
-        
+
         k, v = bits
 
         d[k.strip()] = v.strip()
