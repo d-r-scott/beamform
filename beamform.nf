@@ -19,7 +19,7 @@ process beamform {
     tuple val(pol), val(antnum) from polarisations.combine(antennas)
 
     output:
-    tuple val(pol), path "${params.label}_${antnum}_${pol}_f.npy" into spectra
+    tuple val(pol), path("${params.label}_${antnum}_${pol}_f.npy") into spectra
 
     """
     module load python/2.7.14 
