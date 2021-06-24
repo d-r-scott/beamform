@@ -69,7 +69,7 @@ process sum {
     module load python/3.7.4
     module load numpy/1.18.2-python-3.7.4
 
-    python3 $baseDir/sum.py --f_dir $workDir \
+    python3 $baseDir/sum.py --f_dir . \
                    -f ${params.label} \
                    -p $pol \
                    -o ${params.label}_sum_${pol}_f.npy
