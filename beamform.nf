@@ -165,6 +165,6 @@ process generate_dynspecs {
         mkdir $baseDir/output/${params.label}
     fi
 
-    cp ${params.label}_fulltimeres.tar.gz $baseDir/output/${params.label}
+    cp ${params.label}_n${params.intlen}_fulltimeres.tar.gz $baseDir/output/${params.label}
     """
 }
