@@ -28,11 +28,13 @@ process beamform {
     module load matplotlib/2.2.2-python-2.7.14 
     module load joblib/0.11
 
-    if [ "$pol" == "x" ]; then
+    if [ "$pol" = "x" ]; then
         f_vcraft=${params.x_vcraft}
     else
         f_vcraft=${params.y_vcraft}
     fi
+
+    echo \$f_vcraft
 
     python craftcor_tab.py -i ${params.numints} \
                            -n ${params.intlen} \
