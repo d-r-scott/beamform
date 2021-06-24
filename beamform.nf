@@ -1,8 +1,6 @@
 #!/usr/bin/env nextflow
 
-executor {
-    name = 'slurm'
-}
+process.executor = 'slurm'
 
 params.nant = 20
 antennas = Channel
