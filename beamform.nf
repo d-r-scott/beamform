@@ -38,7 +38,7 @@ process beamform {
                            -n ${params.intlen} \
                            --offset ${params.offset} \
                            --calcfile ${params.calcfile} \
-                           --par_set ${params.fcm} \
+                           --parset ${params.fcm} \
                            --hwfile ${params.hwfile} \
                            --aips_c ${params.bandpass} \
                            --an $antnum \
