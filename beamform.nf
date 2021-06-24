@@ -96,7 +96,7 @@ process deripple {
     fftlen=\$(( ${params.intlen} * 64 ))
 
     python $baseDir/deripple.py -f $spectrum \
-                       -l $fftlen \
+                       -l \$fftlen \
                        -o ${params.label}_sum_${pol}_f_derippled.npy
     """
 }
