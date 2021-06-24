@@ -2,7 +2,7 @@
 
 params.nant = 20
 antennas = Channel
-    .from(0..params.nant)
+    .from(0..params.nant-1)
 
 params.pols = ['x', 'y']
 polarisations = Channel
