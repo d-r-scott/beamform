@@ -28,6 +28,8 @@ process beamform {
     module load matplotlib/2.2.2-python-2.7.14 
     module load joblib/0.11
 
+    PATH=$baseDir:\$PATH
+
     if [ "$pol" = "x" ]; then
         f_vcraft="${params.x_vcraft}"
     else
@@ -64,6 +66,8 @@ process sum {
     module load python/3.7.4
     module load numpy/1.18.2-python-3.7.4
 
+    PATH=$baseDir:\$PATH
+
     python3 sum.py --f_dir $workDir \
                    -f ${params.label} \
                    -p $pol \
@@ -87,6 +91,8 @@ process deripple {
     module load python/2.7.14
     module load numpy/1.16.3-python-2.7.14
     module load scipy/1.0.0-python-2.7.14
+
+    PATH=$baseDir:\$PATH
 
     fftlen=\$(( ${params.intlen} * 64 ))
 
@@ -113,6 +119,8 @@ process dedisperse {
     module load openmpi/3.0.0
     module load python/3.7.4
     module load numpy/1.18.2-python-3.7.4
+
+    PATH=$baseDir:\$PATH
 
     python3 dedisperse.py -f $spectrum \
                           --DM ${params.DM} \
@@ -141,6 +149,8 @@ process ifft {
     module load numpy/1.18.2-python-3.7.4
     module load scipy/1.4.1-python-3.7.4
 
+    PATH=$baseDir:\$PATH
+
     python3 ifft.py -f $spectrum -o ${params.label}_sum_${pol}_t_${params.DM}.npy
     """
 }
@@ -159,6 +169,8 @@ process generate_dynspecs {
     module load openmpi/3.0.0
     module load python/3.7.4
     module load numpy/1.18.2-python-3.7.4
+
+    PATH=$baseDir:\$PATH
 
     python3 dynspecs.py -x ${params.label}_sum_x_t_${params.DM}.npy \
                         -y ${params.label}_sum_y_t_${params.DM}.npy \
