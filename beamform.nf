@@ -88,7 +88,7 @@ process deripple {
     module load numpy/1.16.3-python-2.7.14
     module load scipy/1.0.0-python-2.7.14
 
-    fftlen=$(( ${params.intlen} * 64 ))
+    fftlen=\$(( ${params.intlen} * 64 ))
 
     python deripple.py -f $spectrum \
                        -l $fftlen \
