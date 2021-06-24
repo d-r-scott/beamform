@@ -32,6 +32,7 @@ process beamform {
         f_vcraft=${params.x_vcraft}
     else
         f_vcraft=${params.y_vcraft}
+    fi
 
     python craftcor_tab.py -i ${params.numints} \
                            -n ${params.intlen} \
