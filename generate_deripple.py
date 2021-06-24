@@ -20,7 +20,7 @@ def generate_deripple(nfft, res, dir):
     h_0[:h.shape[0]] = h
     temp=abs(fft.fft(h_0))#,multiple*passbandLength*2))
     print('saving {}'.format(dir+'/deripple_res'+str(res)+'_nfft'+str(nfft)))
-    np.save('../Calibration/deripple_res'+str(res)+'_nfft'+str(nfft),temp)
+    np.save(dir+'/deripple_res'+str(res)+'_nfft'+str(nfft),temp)
     
 def _main():
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
