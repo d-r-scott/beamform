@@ -38,7 +38,7 @@ process beamform {
                            -n ${params.intlen} \
                            --offset ${params.offset} \
                            --calcfile ${params.calcfile} \
-                           --parset ${params.fcm} \
+                           --par_set ${params.fcm} \
                            --aips_c ${params.bandpass} \
                            --an $antnum \
                            -o ${params.label}_${antnum}_${pol}_f.npy \

@@ -586,7 +586,7 @@ def _main():
                         help='Number of threads to run with', default=1)
     parser.add_argument('--calcfile', help='Calc file for fringe rotation')
     parser.add_argument('-w', '--hwfile', help='Hw delay file')
-    parser.add_argument('-p', '--parset', help='Parset for delays')
+    parser.add_argument('-p', '--par_set', help='Parset for delays')
     parser.add_argument('--show', help='Show plot', action='store_true',
                         default=False)
     parser.add_argument('-i', '--n_int',
