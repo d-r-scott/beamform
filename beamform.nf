@@ -43,7 +43,7 @@ process beamform {
                            --aips_c ${params.bandpass} \
                            --an $antnum \
                            -o ${params.label}_${antnum}_${pol}_f.npy \
-                           \$f_vcraft
+                           --tab \$f_vcraft
     """
 }
 
