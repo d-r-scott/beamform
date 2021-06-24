@@ -28,15 +28,13 @@ process beamform {
     module load matplotlib/2.2.2-python-2.7.14 
     module load joblib/0.11
 
-    PATH=$baseDir:\$PATH
-
     if [ "$pol" = "x" ]; then
         f_vcraft="${params.x_vcraft}"
     else
         f_vcraft="${params.y_vcraft}"
     fi
 
-    python craftcor_tab.py -i ${params.numints} \
+    python $baseDir/craftcor_tab.py -i ${params.numints} \
                            -n ${params.intlen} \
                            --offset ${params.offset} \
                            --calcfile ${params.calcfile} \
@@ -66,9 +64,7 @@ process sum {
     module load python/3.7.4
     module load numpy/1.18.2-python-3.7.4
 
-    PATH=$baseDir:\$PATH
-
-    python3 sum.py --f_dir $workDir \
+    python3 $baseDir/sum.py --f_dir $workDir \
                    -f ${params.label} \
                    -p $pol \
                    -o ${params.label}_sum_${pol}_f.npy
@@ -92,11 +88,9 @@ process deripple {
     module load numpy/1.16.3-python-2.7.14
     module load scipy/1.0.0-python-2.7.14
 
-    PATH=$baseDir:\$PATH
-
     fftlen=\$(( ${params.intlen} * 64 ))
 
-    python deripple.py -f $spectrum \
+    python $baseDir/deripple.py -f $spectrum \
                        -l $fftlen \
                        -o ${params.label}_sum_${pol}_f_derippled.npy
     """
@@ -120,9 +114,7 @@ process dedisperse {
     module load python/3.7.4
     module load numpy/1.18.2-python-3.7.4
 
-    PATH=$baseDir:\$PATH
-
-    python3 dedisperse.py -f $spectrum \
+    python3 $baseDir/dedisperse.py -f $spectrum \
                           --DM ${params.DM} \
                           --f0 ${params.f0} \
                           --bw 336 \
@@ -149,9 +141,7 @@ process ifft {
     module load numpy/1.18.2-python-3.7.4
     module load scipy/1.4.1-python-3.7.4
 
-    PATH=$baseDir:\$PATH
-
-    python3 ifft.py -f $spectrum -o ${params.label}_sum_${pol}_t_${params.DM}.npy
+    python3 $baseDir/ifft.py -f $spectrum -o ${params.label}_sum_${pol}_t_${params.DM}.npy
     """
 }
 
@@ -170,9 +160,7 @@ process generate_dynspecs {
     module load python/3.7.4
     module load numpy/1.18.2-python-3.7.4
 
-    PATH=$baseDir:\$PATH
-
-    python3 dynspecs.py -x ${params.label}_sum_x_t_${params.DM}.npy \
+    python3 $baseDir/dynspecs.py -x ${params.label}_sum_x_t_${params.DM}.npy \
                         -y ${params.label}_sum_y_t_${params.DM}.npy \
                         -o ${params.label}_sum_!_@_${params.DM}.npy
     
