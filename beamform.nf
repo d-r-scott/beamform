@@ -34,6 +34,10 @@ process beamform {
         f_vcraft="${params.y_vcraft}"
     fi
 
+    if [ ! -d delays ]; then
+        mkdir delays    # needed by craftcor_tab.py
+    fi
+
     python $baseDir/craftcor_tab.py -i ${params.numints} \
                            -n ${params.intlen} \
                            --offset ${params.offset} \
