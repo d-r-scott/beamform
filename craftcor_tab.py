@@ -449,10 +449,10 @@ class Correlator(object):
         # TODO: (1, 2, 4, 5)
         # Tied-array beamforming
 
-        n_samp = self.n_int
-        n_chan = self.ncoarse_chan * self.n_fine_per_coarse
+        n_samp = int(self.n_int)
+        n_chan = int(self.ncoarse_chan * self.n_fine_per_coarse)
 
-        sum_aligned = np.zeros((n_samp, n_chan, self.n_pol_in),
+        sum_aligned = np.zeros((n_samp, n_chan, int(self.n_pol_in)),
                                dtype=np.complex64)
 
         if an == None:  # add all antennas
