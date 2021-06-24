@@ -37,8 +37,8 @@ process beamform {
     python $baseDir/craftcor_tab.py -i ${params.numints} \
                            -n ${params.intlen} \
                            --offset ${params.offset} \
-                           --calc_file ${params.calcfile} \
-                           --par_set ${params.fcm} \
+                           --calcfile ${params.calcfile} \
+                           --parset ${params.fcm} \
                            --aips_c ${params.bandpass} \
                            --an $antnum \
                            -o ${params.label}_${antnum}_${pol}_f.npy \

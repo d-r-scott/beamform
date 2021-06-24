@@ -61,7 +61,7 @@ def process_chan(chan, corr, n_fine, chan_raw_data, geom_delays_us, i_ant):
                           contains the edge regions that will be cut.
     :param geom_delays_us: Geometric delays as a numpy array in units of
                            microseconds.
-    :i_ant: Antenna number (NOT name) as an integer.
+    :param i_ant: Antenna number (NOT name) as an integer.
     :return: xfguard_f: Processed channel spectral data
              fine_chan_start: Index of the first fine channel in the
                               combined spectral array.
@@ -584,9 +584,9 @@ def _main():
                              + 'default=1', default=1)
     parser.add_argument('-t', '--num-threads', type=int,
                         help='Number of threads to run with', default=1)
-    parser.add_argument('--calc_file', help='Calc file for fringe rotation')
+    parser.add_argument('--calcfile', help='Calc file for fringe rotation')
     parser.add_argument('-w', '--hwfile', help='Hw delay file')
-    parser.add_argument('-p', '--par_set', help='Parset for delays')
+    parser.add_argument('-p', '--parset', help='Parset for delays')
     parser.add_argument('--show', help='Show plot', action='store_true',
                         default=False)
     parser.add_argument('-i', '--n_int',
