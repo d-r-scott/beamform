@@ -10,7 +10,7 @@ def _main():
 	start = time.time()
 	args = get_args()
 	sum_f = load(args.f)
-	sum_f_deripple = deripple(sum_f, fftLength=args.l)
+	sum_f_deripple = deripple(sum_f, args.coeffs, fftLength=args.l)
 	save(sum_f_deripple, args.o)
 	end = time.time()
 	print 'deripple.py finished in {} s'.format(end-start)
@@ -22,13 +22,14 @@ def get_args():
 	parser.add_argument('-f', help='Fine spectrum file')
 	parser.add_argument('-l', type=int, help='FFT length')
 	parser.add_argument('-o', help='Output file')
+	parser.add_argument('-c', '--coeffs', help='Directory for derippling coefficients')
 	return parser.parse_args()
 
 def load(fname):
 	return np.load(fname)
 
 
-def deripple(FFFF, fftLength = 1048576, bw=336):
+def deripple(FFFF, coeff_dir, fftLength = 1048576, bw=336):
 	"""
 	deripple input fine spectrum
 	Taken from freq2time.py, written by Hyerin Cho
@@ -48,7 +49,7 @@ def deripple(FFFF, fftLength = 1048576, bw=336):
 	passbandLength = int(((fftLength / 2) * OS_De) / OS_Nu)
 
 	# de-ripple coefficients
-	dr_c_file = '../Calibration/deripple_res6_nfft'+str(fftLength)+'.npy'
+	dr_c_file = coeff_dir+'/deripple_res6_nfft'+str(fftLength)+'.npy'
 	if os.path.exists(dr_c_file)==False:
 		from generate_deripple import generate_deripple
 		print('No derippling coefficient found. Generating one...')

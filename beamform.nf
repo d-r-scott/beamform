@@ -95,9 +95,14 @@ process deripple {
 
     fftlen=\$(( ${params.intlen} * 64 ))
 
+    if [ ! -d $baseDir/.deripple_coeffs ]; then
+        mkdir $baseDir/.deripple_coeffs
+    fi
+
     python $baseDir/deripple.py -f $spectrum \
                        -l \$fftlen \
-                       -o ${params.label}_sum_${pol}_f_derippled.npy
+                       -o ${params.label}_sum_${pol}_f_derippled.npy \
+                       -c $baseDir/.deripple_coeffs
     """
 }
 
