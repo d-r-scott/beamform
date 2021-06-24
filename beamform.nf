@@ -1,7 +1,5 @@
 #!/usr/bin/env nextflow
 
-process.executor = 'slurm'
-
 params.nant = 20
 antennas = Channel
     .from(0..params.nant)
@@ -11,6 +9,7 @@ polarisations = Channel
     .fromList(params.pols)
 
 process beamform {
+    executor 'slurm'
     cpus 4
     time '30m'
     memory '128 GB'
@@ -47,6 +46,7 @@ process beamform {
 }
 
 process sum {
+    executor 'slurm'
     cpus 1
     time '15m'
     memory '16 GB'
@@ -71,6 +71,7 @@ process sum {
 }
 
 process deripple {
+    executor 'slurm'
     cpus 1
     time '1h'
     memory '64 GB'
@@ -95,6 +96,7 @@ process deripple {
 }
 
 process dedisperse {
+    executor 'slurm'
     cpus 1
     time '10m'
     memory '64 GB'
@@ -120,6 +122,7 @@ process dedisperse {
 }
 
 process ifft {
+    executor 'slurm'
     cpus 1
     time '10m'
     memory '32 GB'
@@ -142,6 +145,7 @@ process ifft {
 }
 
 process generate_dynspecs {
+    executor 'slurm'
     cpus 1
     time '1h'
     memory '64 GB'
