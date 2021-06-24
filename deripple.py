@@ -53,7 +53,7 @@ def deripple(FFFF, coeff_dir, fftLength = 1048576, bw=336):
 	if os.path.exists(dr_c_file)==False:
 		from generate_deripple import generate_deripple
 		print('No derippling coefficient found. Generating one...')
-		generate_deripple(fftLength,6)
+		generate_deripple(fftLength,6, coeff_dir)
 	print('loading {}'.format(dr_c_file))
 	temp=np.load(dr_c_file)
 	print('{} loaded!'.format(dr_c_file))

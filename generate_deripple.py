@@ -5,11 +5,11 @@ from scipy import io
 from scipy import fftpack as fft
 import numpy as np
 
-def generate_deripple(nfft,res):
+def generate_deripple(nfft, res, dir):
     N = 1536
     OS_De = 27.
     OS_Nu = 32.
-    dr = '../Calibration/ADE_R6_OSFIR.mat'
+    dr = dir+'/ADE_R6_OSFIR.mat'
     h = io.loadmat(dr)['c'][0]
     passbandLength = int(((nfft / 2) * OS_De) / OS_Nu)
     multiple = int(1536/res)
@@ -19,7 +19,7 @@ def generate_deripple(nfft,res):
     h_0 = np.zeros(multiple*passbandLength*2)
     h_0[:h.shape[0]] = h
     temp=abs(fft.fft(h_0))#,multiple*passbandLength*2))
-    print('saving {}'.format('../Calibration/deripple_res'+str(res)+'_nfft'+str(nfft)))
+    print('saving {}'.format(dir+'/deripple_res'+str(res)+'_nfft'+str(nfft)))
     np.save('../Calibration/deripple_res'+str(res)+'_nfft'+str(nfft),temp)
     
 def _main():
