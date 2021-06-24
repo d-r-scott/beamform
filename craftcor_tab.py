@@ -312,7 +312,7 @@ class Correlator(object):
         self.d_utc = 0
         self.mjd0 = self.ref_ant.mjd_start + self.d_utc / 86400.0
         self.frame0 = self.ref_ant.trigger_frame
-        self.n_int = values.n_int
+        self.n_int = int(values.n_int)
         self.n_fft = 64 * values.fft_size
         self.nguard_chan = NUM_GUARD_CHAN * values.fft_size
         self.oversamp = F_OS
@@ -321,7 +321,7 @@ class Correlator(object):
         self.sideband = -1
         self.coarse_chan_bwidth = 1.0
         self.n_fine_per_coarse = self.n_fft - 2 * self.nguard_chan
-        self.n_fine_chan = self.ncoarse_chan * self.n_fine_per_coarse
+        self.n_fine_chan = int(self.ncoarse_chan * self.n_fine_per_coarse)
         self.fine_chan_bwidth = (self.coarse_chan_bwidth
                                  / float(self.n_fine_per_coarse))
         self.full_bw = self.fine_chan_bwidth * self.n_fine_chan
