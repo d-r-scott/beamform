@@ -38,7 +38,18 @@ process beamform {
         mkdir delays    # needed by craftcor_tab.py
     fi
 
-    python $baseDir/craftcor_tab.py -i ${params.numints} \
+    if [ "${params.hwfile} = "" ]; then
+        python $baseDir/craftcor_tab.py -i ${params.numints} \
+                           -n ${params.intlen} \
+                           --offset ${params.offset} \
+                           --calcfile ${params.calcfile} \
+                           --parset ${params.fcm} \
+                           --aips_c ${params.bandpass} \
+                           --an $antnum \
+                           -o ${params.label}_${antnum}_${pol}_f.npy \
+                           --tab \$f_vcraft
+    else
+        python $baseDir/craftcor_tab.py -i ${params.numints} \
                            -n ${params.intlen} \
                            --offset ${params.offset} \
                            --calcfile ${params.calcfile} \
@@ -48,6 +59,7 @@ process beamform {
                            --an $antnum \
                            -o ${params.label}_${antnum}_${pol}_f.npy \
                            --tab \$f_vcraft
+    fi
     """
 }
 
