@@ -38,7 +38,7 @@ process beamform {
         mkdir delays    # needed by craftcor_tab.py
     fi
 
-    if [ "${params.hwfile} = "" ]; then
+    if [ "${params.hwfile}" = "" ]; then
         python $baseDir/craftcor_tab.py -i ${params.numints} \
                            -n ${params.intlen} \
                            --offset ${params.offset} \
