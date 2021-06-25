@@ -138,6 +138,8 @@ process ifft {
     time '10m'
     memory '32 GB'
 
+    publishDir mode: 'copy'
+
     input:
     tuple val(pol), path(spectrum) from dedispersed_spectrum
 
@@ -161,10 +163,13 @@ process generate_dynspecs {
     time '1h'
     memory '64 GB'
 
-    mode: 'copy'
+    publishDir baseDir/output/params.label, mode: 'copy'
 
     input:
     path pol_time_series from pol_time_series.collect()
+
+    output:
+    path "${params.label}_n${params.intlen}_fulltimeres.tar.gz"
 
     """
     module load gcc/7.3.0
@@ -177,15 +182,5 @@ process generate_dynspecs {
                         -o ${params.label}_sum_!_@_${params.DM}.npy
     
     tar czvf ${params.label}_n${params.intlen}_fulltimeres.tar.gz ${params.label}_sum*${params.DM}.npy
-
-    if [ ! -d $baseDir/output ]; then
-        mkdir $baseDir/output
-    fi
-
-    if [ ! -d $baseDir/output/${params.label} ]; then
-        mkdir $baseDir/output/${params.label}
-    fi
-
-    cp ${params.label}_n${params.intlen}_fulltimeres.tar.gz $baseDir/output/${params.label}
     """
 }
