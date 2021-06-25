@@ -161,6 +161,8 @@ process generate_dynspecs {
     time '1h'
     memory '64 GB'
 
+    mode: 'copy'
+
     input:
     path pol_time_series from pol_time_series.collect()
 
