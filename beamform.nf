@@ -150,8 +150,6 @@ process ifft {
     time '10m'
     memory '32 GB'
 
-    publishDir, mode: 'copy'
-
     input:
     tuple val(pol), path(spectrum) from dedispersed_spectrum
 
@@ -192,7 +190,7 @@ process generate_dynspecs {
     python3 $baseDir/dynspecs.py -x ${params.label}_sum_x_t_${params.DM}.npy \
                         -y ${params.label}_sum_y_t_${params.DM}.npy \
                         -o ${params.label}_sum_!_@_${params.DM}.npy
-    
-    tar czvf ${params.label}_n${params.intlen}_fulltimeres.tar.gz ${params.label}_sum*${params.DM}.npy
+
+    tar -czvfh ${params.label}_n${params.intlen}_fulltimeres.tar.gz ${params.label}_sum*${params.DM}.npy
     """
 }
