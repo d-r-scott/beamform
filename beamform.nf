@@ -173,7 +173,7 @@ process generate_dynspecs {
     time '1h'
     memory '64 GB'
 
-    publishDir "$baseDir/output/${params.label}", mode: 'copy'
+    publishDir "$baseDir/output/${params.label}", mode: 'move'
 
     input:
     path pol_time_series from pol_time_series.collect()
