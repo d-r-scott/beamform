@@ -179,7 +179,7 @@ process generate_dynspecs {
     path pol_time_series from pol_time_series.collect()
 
     output:
-    path "${params.label}_n${params.intlen}_fulltimeres.tar.gz"
+    path "${params.label}_n${params.intlen}_DM${params.DM}_fulltimeres.tar.gz"
 
     """
     module load gcc/7.3.0
@@ -191,6 +191,6 @@ process generate_dynspecs {
                         -y ${params.label}_sum_y_t_${params.DM}.npy \
                         -o ${params.label}_sum_!_@_${params.DM}.npy
 
-    tar -czvhf ${params.label}_n${params.intlen}_fulltimeres.tar.gz ${params.label}_sum*${params.DM}.npy
+    tar -czvhf ${params.label}_n${params.intlen}_DM${params.DM}_fulltimeres.tar.gz ${params.label}_sum*${params.DM}.npy
     """
 }
