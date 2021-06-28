@@ -191,6 +191,6 @@ process generate_dynspecs {
                         -y ${params.label}_sum_y_t_${params.DM}.npy \
                         -o ${params.label}_sum_!_@_${params.DM}.npy
 
-    tar -czvfh ${params.label}_n${params.intlen}_fulltimeres.tar.gz ${params.label}_sum*${params.DM}.npy
+    tar -czvhf ${params.label}_n${params.intlen}_fulltimeres.tar.gz ${params.label}_sum*${params.DM}.npy
     """
 }
