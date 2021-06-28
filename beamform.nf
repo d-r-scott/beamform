@@ -150,7 +150,7 @@ process ifft {
     time '10m'
     memory '32 GB'
 
-    publishDir mode: 'copy'
+    publishDir, mode: 'copy'
 
     input:
     tuple val(pol), path(spectrum) from dedispersed_spectrum
