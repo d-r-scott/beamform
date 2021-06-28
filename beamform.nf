@@ -10,9 +10,9 @@ polarisations = Channel
 
 process beamform {
     executor 'slurm'
-    cpus 1
+    cpus 4
     time '15m'
-    memory '64 GB'
+    memory '32 GB'
 
     input:
     tuple val(pol), val(antnum) from polarisations.combine(antennas)
