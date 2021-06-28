@@ -34,7 +34,7 @@ def dedisperse(f, DM, f0, bw):
 	"""
 	Takes heavy inspiration from Hyerin Cho's coh_dedisp function from freq2time.py
 	"""
-	print('Dedispersing')
+	#print('Dedispersing')
 
 	n_sam = len(f)
 
